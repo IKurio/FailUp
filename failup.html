@@ -1,0 +1,2722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FailUp — Negative Research Repository</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #fafcfa;
+    --surface: #ffffff;
+    --surface2: #f4f8f6;
+    --sidebar-bg: #809bce;
+    --border: rgba(128,155,206,0.18);
+    --border2: rgba(149,184,209,0.40);
+    --accent: #5a7fb5;
+    --accent2: #3f6096;
+    --accent-dim: rgba(128,155,206,0.10);
+    --accent-glow: rgba(128,155,206,0.06);
+    --text: #1a2234;
+    --text2: #4a5a78;
+    --text3: #8a9ab8;
+    --red: #b06080;
+    --amber: #7a8a60;
+    --teal: #6aab9a;
+    --pastel-blue: #809bce;
+    --pastel-teal: #95b8d1;
+    --pastel-mint: #b8e0d2;
+    --pastel-green: #d6eadf;
+    --pastel-pink: #eac4d5;
+    --font-serif: 'Playfair Display', serif;
+    --font-sans: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --radius: 3px;
+    --radius-lg: 6px;
+    --radius-xl: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── PAPER TEXTURE BACKGROUND ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── LAYOUT ── */
+  .shell { position: relative; z-index: 1; display: flex; height: 100vh; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 216px;
+    flex-shrink: 0;
+    border-right: none;
+    background: var(--sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  .logo {
+    padding: 22px 18px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+  }
+  .logo-mark {
+    font-family: var(--font-serif);
+    font-size: 19px;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+  }
+  .logo-sub {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 0.12em;
+    margin-top: 5px;
+    text-transform: uppercase;
+  }
+
+  .nav { padding: 12px 8px; flex: 1; }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 10px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    color: rgba(255,255,255,0.65);
+    font-size: 12.5px;
+    font-weight: 500;
+    transition: all 0.12s;
+    margin-bottom: 1px;
+    letter-spacing: 0.01em;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.15); color: #ffffff; }
+  .nav-item.active {
+    background: rgba(255,255,255,0.22);
+    color: #ffffff;
+    border-left: 2px solid #eac4d5;
+    padding-left: 8px;
+  }
+  .nav-icon { width: 15px; text-align: center; font-size: 12px; opacity: 0.7; }
+
+  .sidebar-stats {
+    padding: 14px 16px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    font-family: var(--font-mono);
+  }
+  .stat-row { display: flex; justify-content: space-between; margin-bottom: 6px; align-items: center; }
+  .stat-label { font-size: 9px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.12em; }
+  .stat-val { font-size: 10.5px; font-weight: 500; color: #eac4d5; }
+
+  /* ── MAIN CONTENT ── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    height: 56px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 12px;
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+  .topbar-title { font-family: var(--font-sans); font-size: 14px; font-weight: 600; color: var(--text); flex: 1; letter-spacing: 0.01em; }
+  .topbar-tag {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border2);
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .btn {
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: none;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #ffffff;
+    box-shadow: 0 2px 10px rgba(90,127,181,0.25);
+  }
+  .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(90,127,181,0.32); }
+  .btn-ghost {
+    background: #ffffff;
+    color: var(--text2);
+    border: 1.5px solid var(--border2);
+    font-weight: 600;
+  }
+  .btn-ghost:hover { background: var(--pastel-green); color: var(--accent); border-color: var(--border2); }
+
+  /* ── PAGE CONTENT ── */
+  .page { display: none; flex: 1; overflow-y: auto; padding: 28px 28px 40px; }
+  .page.active { display: block; }
+
+  /* ── DASHBOARD ── */
+  .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+  .metric-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    transition: border-color 0.15s;
+  }
+  .metric-card:hover { border-color: var(--border2); }
+  .metric-label { font-family: var(--font-mono); font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 10px; }
+  .metric-val { font-family: var(--font-serif); font-size: 30px; font-weight: 600; color: var(--text); line-height: 1; }
+  .metric-sub { font-size: 11px; color: var(--text2); margin-top: 6px; }
+  .metric-card.accent .metric-val { color: var(--accent); }
+
+  .dash-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 18px; }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .panel-head {
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+  }
+  .panel-title { font-size: 12px; font-weight: 600; color: var(--text); letter-spacing: 0.02em; }
+  .panel-body { padding: 16px 18px; }
+
+  .trial-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.12s;
+    margin: 0 -18px;
+  }
+  .trial-row:last-child { border-bottom: none; }
+  .trial-row:hover { background: var(--accent-glow); }
+  .trial-type {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    flex-shrink: 0;
+  }
+  .type-null { background: rgba(128,155,206,0.12); color: #5a7fb5; border: 1px solid rgba(128,155,206,0.25); }
+  .type-inconclusive { background: rgba(184,224,210,0.25); color: #3a8a72; border: 1px solid rgba(149,184,209,0.30); }
+  .type-opposite { background: rgba(234,196,213,0.25); color: #a05070; border: 1px solid rgba(234,196,213,0.40); }
+  .trial-name { flex: 1; font-size: 12px; color: var(--text); }
+  .trial-meta { font-family: var(--font-mono); font-size: 10px; color: var(--text3); }
+
+  /* ── FAILURE GRAPH ── */
+  /* graph-canvas removed — replaced by failure summary view */
+  .graph-controls { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .filter-chip {
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border2);
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--text2);
+    background: var(--surface);
+    font-family: var(--font-sans);
+    transition: all 0.15s;
+  }
+  .filter-chip:hover, .filter-chip.active { background: var(--accent-dim); color: var(--accent); border-color: var(--border2); }
+  .graph-legend { display: flex; gap: 20px; margin-top: 12px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text3); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* ── UPLOAD FORM ── */
+  .upload-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; }
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+  }
+  .form-section-title {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 6px; font-weight: 500; }
+  .field input, .field select, .field textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 9px 12px;
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); background: var(--surface); }
+  .field select option { background: var(--surface); }
+  .field textarea { min-height: 80px; resize: vertical; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .result-selector { display: flex; gap: 8px; }
+  .result-opt {
+    flex: 1;
+    padding: 11px 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    text-align: center;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text3);
+    background: var(--surface2);
+  }
+  .result-opt:hover { background: var(--accent-dim); color: var(--accent); border-color: var(--border2); }
+  .result-opt.selected-null { background: rgba(70,100,150,0.08); color: #3d5e8a; border-color: rgba(70,100,150,0.25); }
+  .result-opt.selected-inconclusive { background: rgba(130,95,30,0.08); color: #6a4e18; border-color: rgba(130,95,30,0.25); }
+  .result-opt.selected-opposite { background: rgba(140,55,45,0.08); color: #7a3020; border-color: rgba(140,55,45,0.25); }
+
+  .ai-preview {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    position: sticky;
+    top: 0;
+  }
+  .ai-preview-title {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ai-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .summary-block {
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .summary-block:last-child { border-bottom: none; margin-bottom: 0; }
+  .summary-block-label { font-family: var(--font-mono); font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .summary-block-text { font-size: 12px; color: var(--text2); line-height: 1.7; font-style: italic; }
+  .summary-placeholder { color: var(--text3); font-style: normal; }
+
+  /* ── SEARCH PAGE ── */
+  .search-bar-wrap { position: relative; margin-bottom: 20px; }
+  .search-bar {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-lg);
+    padding: 14px 18px 14px 44px;
+    color: var(--text);
+    font-family: var(--font-serif);
+    font-size: 18px;
+    font-style: italic;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-bar:focus { border-color: var(--accent); }
+  .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 16px; }
+
+  .results-grid { display: grid; gap: 14px; }
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .result-card:hover { border-color: var(--border2); background: var(--accent-glow); }
+  .result-card-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+  .result-card-title { font-family: var(--font-serif); font-size: 15px; font-weight: 500; color: var(--text); flex: 1; line-height: 1.35; }
+  .result-card-body { font-size: 12px; color: var(--text2); line-height: 1.7; margin-bottom: 12px; }
+  .result-card-footer { display: flex; gap: 16px; }
+  .result-card-meta { font-family: var(--font-mono); font-size: 10px; color: var(--text3); }
+  .contradiction-badge {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    padding: 2px 9px;
+    border-radius: 4px;
+    background: rgba(140,55,45,0.08);
+    color: #7a3020;
+    border: 1px solid rgba(140,55,45,0.20);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-left: auto;
+  }
+  .source-badge {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    padding: 2px 9px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    border: 1px solid var(--border2);
+    color: var(--text2);
+    background: var(--surface2);
+    white-space: nowrap;
+  }
+  .source-manual { background: rgba(184,224,210,0.22); color: #3a8a72; border-color: rgba(149,184,209,0.30); }
+  .source-ctgov_imported { background: rgba(128,155,206,0.10); color: var(--accent); border-color: rgba(128,155,206,0.22); }
+  .source-ctgov_enriched { background: rgba(234,196,213,0.18); color: #9a5171; border-color: rgba(234,196,213,0.36); }
+  .source-pubmed_imported { background: rgba(149,184,209,0.16); color: #4d6f92; border-color: rgba(149,184,209,0.36); }
+  .source-pubmed_enriched { background: rgba(184,224,210,0.22); color: #3a8a72; border-color: rgba(149,184,209,0.30); }
+  .source-ctgov_curated { background: rgba(234,196,213,0.20); color: #9a5171; border-color: rgba(234,196,213,0.42); }
+  .source-pubmed_curated { background: rgba(214,234,223,0.75); color: #4f7a63; border-color: rgba(122,138,96,0.30); }
+
+  /* ── PROFILE ── */
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 20px;
+  }
+  .avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--accent-dim);
+    border: 2px solid var(--border2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .profile-name { font-family: var(--font-serif); font-size: 20px; font-weight: 600; color: var(--text); }
+  .profile-meta { font-size: 12px; color: var(--text2); margin-top: 4px; }
+  .badges-grid { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .badge {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 11px;
+    border: 1px solid var(--border);
+    color: var(--text3);
+    background: var(--surface2);
+  }
+  .badge.earned { background: var(--accent-dim); color: var(--accent); border-color: var(--border2); }
+  .badge-icon { font-size: 12px; }
+
+  .contributions-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .contributions-table th { font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+  .contributions-table td { padding: 11px 14px; border-bottom: 1px solid var(--border); color: var(--text2); }
+  .contributions-table tr:last-child td { border-bottom: none; }
+  .contributions-table tr:hover td { color: var(--text); background: var(--accent-glow); }
+  .doi-link { font-family: var(--font-mono); color: var(--accent); font-size: 10px; }
+
+  /* ── NOTIFICATION TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-lg);
+    padding: 14px 18px;
+    font-size: 13px;
+    color: var(--text);
+    z-index: 100;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    max-width: 300px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast-title { font-weight: 600; color: var(--accent); margin-bottom: 3px; font-size: 13px; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(30,20,10,0.45);
+    z-index: 50;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    width: 520px;
+    max-width: 90vw;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.97); transition: transform 0.2s;
+  }
+  .modal-overlay.open .modal { transform: scale(1); }
+  .modal-title { font-family: var(--font-serif); font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+  .modal-sub { font-size: 12px; color: var(--text2); margin-bottom: 20px; font-family: var(--font-mono); }
+  .modal-body { font-size: 13px; color: var(--text2); line-height: 1.7; overflow-y: auto; padding-right: 6px; }
+  .modal-section { margin-bottom: 14px; }
+  .modal-section-label { font-family: var(--font-mono); font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 5px; }
+  .modal-close { float: right; background: var(--surface2); border: 1px solid var(--border); color: var(--text3); font-size: 14px; cursor: pointer; width: 26px; height: 26px; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+
+  /* ── AUTOFILL CARD ── */
+  .autofill-card {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    margin-bottom: 16px;
+  }
+  .autofill-icon {
+    font-size: 16px;
+    width: 38px; height: 38px;
+    border-radius: var(--radius);
+    background: var(--accent-dim);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; color: var(--accent);
+  }
+  .autofill-body { flex: 1; }
+  .autofill-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .autofill-sub { font-size: 12px; color: var(--text2); line-height: 1.6; margin-bottom: 10px; }
+  .autofill-dropzone {
+    border: 1px dashed var(--border2);
+    border-radius: var(--radius);
+    padding: 9px 14px;
+    font-size: 12px; color: var(--text3);
+    cursor: pointer; transition: all 0.15s; text-align: center;
+    background: var(--surface);
+  }
+  .autofill-dropzone:hover, .autofill-dropzone.drag-over { border-color: var(--accent); background: var(--accent-glow); color: var(--text2); }
+  .autofill-progress { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin: 10px 0 5px; }
+  .autofill-progress-bar { height: 100%; background: var(--accent); border-radius: 2px; width: 0%; transition: width 0.4s ease; }
+  .autofill-status-text { font-size: 10px; color: var(--accent); font-family: var(--font-mono); }
+  .autofill-done { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--accent-dim); border: 1px solid var(--border2); border-radius: var(--radius); font-size: 12px; color: var(--accent); margin-top: 8px; }
+  .field input.autofilled, .field textarea.autofilled, .field select.autofilled { border-color: var(--accent) !important; background: var(--accent-glow) !important; }
+
+  /* ── STEP BAR ── */
+  .step-bar { display:flex; align-items:center; margin-bottom:24px; }
+  .step { display:flex; align-items:center; gap:8px; cursor:pointer; opacity:0.4; transition:opacity 0.2s; }
+  .step.active { opacity:1; }
+  .step.done { opacity:0.7; }
+  .step-num { width:24px; height:24px; border-radius:4px; background:var(--surface2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:10px; color:var(--text3); flex-shrink:0; }
+  .step.active .step-num { background:var(--accent); color:#fdfaf5; border-color:var(--accent); }
+  .step.done .step-num { background:var(--accent-dim); color:var(--accent); border-color:var(--border2); }
+  .step-label { font-size:12px; font-weight:500; color:var(--text2); white-space:nowrap; }
+  .step.active .step-label { color:var(--text); }
+  .step-line { flex:1; height:1px; background:var(--border); margin:0 8px; min-width:12px; }
+
+  /* ── FORM STEPS ── */
+  .form-step { display:none; }
+  .form-step.active { display:block; }
+
+  /* ── DROP ZONES ── */
+  .drop-zone {
+    border: 1px dashed var(--border2);
+    border-radius: var(--radius-lg);
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--surface2);
+  }
+  .drop-zone:hover, .drop-zone.drag-over { border-color: var(--accent); background: var(--accent-glow); }
+  .dz-icon { font-size: 20px; color: var(--text3); margin-bottom: 8px; }
+  .dz-text { font-size: 13px; color: var(--text2); margin-bottom: 4px; }
+  .dz-sub { font-size: 11px; color: var(--text3); }
+  .file-list { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .file-chip {
+    display: flex; align-items: center; gap: 8px;
+    padding: 4px 12px; border-radius: 4px;
+    background: var(--accent-dim); border: 1px solid var(--border2);
+    font-size: 11px; color: var(--accent); font-family: var(--font-mono);
+  }
+  .file-chip-remove { cursor: pointer; color: var(--text3); font-size: 13px; }
+  .file-chip-remove:hover { color: var(--red); }
+
+  /* ── NF-INDEX CARD ── */
+  .nf-index-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    overflow: hidden;
+  }
+  .nf-index-left {
+    background: #e8f4f0;
+    border-right: 1px solid var(--border);
+    padding: 28px 20px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+  }
+  .nf-index-label { font-family: var(--font-mono); font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px; }
+  .nf-index-score { font-family: var(--font-serif); font-size: 72px; font-weight: 600; color: var(--accent); line-height: 1; margin-bottom: 8px; }
+  .nf-index-sub { font-size: 11px; color: var(--text2); line-height: 1.5; }
+  .nf-index-right { padding: 22px 24px; }
+  .nf-index-explain-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .nf-index-explain { font-size: 12px; color: var(--text2); line-height: 1.7; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .nf-index-explain strong { color: var(--accent); font-weight: 600; }
+  .nf-breakdown { display: flex; flex-direction: column; gap: 8px; }
+  .nf-bar-row { display: flex; align-items: center; gap: 10px; }
+  .nf-bar-label { font-size: 11px; color: var(--text2); min-width: 110px; font-family: var(--font-mono); }
+  .nf-bar-track { flex: 1; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; border: 1px solid var(--border); }
+  .nf-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+  .nf-bar-val { font-size: 10px; color: var(--text3); font-family: var(--font-mono); min-width: 140px; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 10px; }
+
+  /* section header */
+  .page-header { margin-bottom: 22px; }
+  .page-header h1 { font-family: var(--font-serif); font-size: 24px; font-weight: 600; color: var(--text); margin-bottom: 4px; letter-spacing: 0.01em; }
+  .page-header p { font-size: 12.5px; color: var(--text2); }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-mark">FailUp</div>
+      <div class="logo-sub">Negative research repository</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-item active" onclick="navigate('welcome')">
+        <span class="nav-icon">⌂</span> Welcome
+      </div>
+      <div class="nav-item" onclick="navigate('dashboard')">
+        <span class="nav-icon">◈</span> Dashboard
+      </div>
+      <div class="nav-item" onclick="navigate('graph')">
+        <span class="nav-icon">⬡</span> Failure Summary
+      </div>
+      <div class="nav-item" onclick="navigate('upload')">
+        <span class="nav-icon">↑</span> Submit Finding
+      </div>
+      <div class="nav-item" onclick="navigate('search')">
+        <span class="nav-icon">◎</span> Search
+      </div>
+      <div class="nav-item" onclick="navigate('profile')">
+        <span class="nav-icon">◉</span> My Profile
+      </div>
+    </nav>
+    <div class="sidebar-stats">
+      <div class="stat-row"><span class="stat-label">Studies indexed</span><span class="stat-val">4,812</span></div>
+      <div class="stat-row"><span class="stat-label">Null results</span><span class="stat-val">3,204</span></div>
+      <div class="stat-row"><span class="stat-label">Curated records</span><span class="stat-val">18,440</span></div>
+      <div class="stat-row"><span class="stat-label">Contradictions</span><span class="stat-val" style="color:var(--red)">127</span></div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">Welcome to FailUp</div>
+      <span class="topbar-tag">✨ Beta v0.1</span>
+      <button class="btn btn-ghost" onclick="navigate('upload')">+ Submit finding</button>
+      <button class="btn btn-primary" onclick="navigate('graph')">Explore summaries →</button>
+    </div>
+
+    <!-- WELCOME PAGE -->
+    <div class="page active" id="page-welcome">
+      <div class="page-header">
+        <h1>Welcome to FailUp</h1>
+        <p>A searchable repository for negative, null, and inconclusive biomedical research findings.</p>
+      </div>
+
+      <!-- Mission statement -->
+      <div style="background:linear-gradient(135deg,#dde8f8 0%,#e8f4f0 50%,#f0eef8 100%);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:24px 28px;margin-bottom:24px;">
+        <div style="font-family:var(--font-serif);font-size:19px;font-weight:600;color:var(--text);margin-bottom:10px;line-height:1.4;">Why do failed experiments matter?</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.9;max-width:720px;">
+          In biomedical research, <strong>negative and null results are rarely published</strong> — even though they carry enormous scientific value. This is called <em>publication bias</em>, and it means the research community keeps unknowingly repeating the same failed experiments, wasting time and funding that could go toward genuinely new directions.<br/><br/>
+          FailUp exists to fix that. By giving researchers a dedicated place to deposit, summarize, and share negative findings, we turn isolated failures into a <strong>shared, searchable body of scientific knowledge</strong>. Every null result you contribute helps someone else avoid a dead end.
+        </div>
+      </div>
+
+      <!-- How it works -->
+      <div style="margin-bottom:24px;">
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:14px;letter-spacing:0.02em;">How FailUp works</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;">
+            <div style="font-size:22px;margin-bottom:8px;">📤</div>
+            <div style="font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:6px;">1. Submit your finding</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.7;">Upload your study documents or fill in the structured form. Our AI reads your materials and generates a standardized IMRAD-style summary — you review and approve it before it's published.</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;">
+            <div style="font-size:22px;margin-bottom:8px;">🤖</div>
+            <div style="font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:6px;">2. AI summarizes & classifies</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.7;">Claude writes a structured repository summary with background, study plan, methods, results, limitations, and standardized study tags, while also checking for contradictions with prior positive literature.</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;">
+            <div style="font-size:22px;margin-bottom:8px;">🔗</div>
+            <div style="font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:6px;">3. Connects to the repository</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.7;">Your finding is added to the Failure Summary — grouped alongside related studies by shared mechanisms, targets, and populations. Patterns across failures become visible as the repository grows.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation guide -->
+      <div style="margin-bottom:24px;">
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:14px;letter-spacing:0.02em;">Where to go from here</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;cursor:pointer;transition:border-color 0.15s;" onclick="navigate('dashboard')" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+              <span style="font-size:16px;">◈</span>
+              <span style="font-size:12.5px;font-weight:700;color:var(--accent);">Dashboard →</span>
+            </div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.6;">See recent submissions, active failure clusters, and platform-wide statistics. Your starting point for exploring what's already in the repository.</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;cursor:pointer;transition:border-color 0.15s;" onclick="navigate('upload')" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+              <span style="font-size:16px;">↑</span>
+              <span style="font-size:12.5px;font-weight:700;color:var(--accent);">Submit a Finding →</span>
+            </div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.6;">Deposit a negative, null, or inconclusive result. Takes ~5–10 minutes. You'll receive a citable DOI and contribute to the shared knowledge repository.</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;cursor:pointer;transition:border-color 0.15s;" onclick="navigate('graph')" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+              <span style="font-size:16px;">⬡</span>
+              <span style="font-size:12.5px;font-weight:700;color:var(--accent);">Failure Summary →</span>
+            </div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.6;">Browse all submissions grouped by failure mode and therapeutic area. See how studies relate, spot patterns across failures, and click any card to read the full AI-generated summary.</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;cursor:pointer;transition:border-color 0.15s;" onclick="navigate('search')" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+              <span style="font-size:16px;">◎</span>
+              <span style="font-size:12.5px;font-weight:700;color:var(--accent);">Search →</span>
+            </div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.6;">Search by drug target, mechanism, therapeutic area, or failure pattern. Find out if someone has already tried what you're considering — and what happened.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Beta note -->
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 18px;font-size:12px;color:var(--text3);line-height:1.7;">
+        <strong style="color:var(--text2);">🔬 Beta v0.1 — prototype note:</strong> FailUp is currently an early-stage prototype. The data, repository patterns, and AI summaries shown are illustrative examples. API integration for live AI summarization is coming in the next development phase. All feedback is welcome.
+      </div>
+    </div>
+
+    <!-- DASHBOARD PAGE -->
+    <div class="page" id="page-dashboard">
+      <div class="page-header">
+        <h1>Overview</h1>
+        <p>A living map of what doesn't work — and what that means for what might.</p>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card accent">
+          <div class="metric-label">New this week</div>
+          <div class="metric-val">84</div>
+          <div class="metric-sub">negative findings deposited</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Contradictions flagged</div>
+          <div class="metric-val" style="color:var(--red)">12</div>
+          <div class="metric-sub">vs prior positive literature</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">AI summaries generated</div>
+          <div class="metric-val">4,619</div>
+          <div class="metric-sub">avg. review time 4.2 min</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Duplicated efforts saved</div>
+          <div class="metric-val" style="color:var(--teal)">$2.1M</div>
+          <div class="metric-sub">estimated R&D cost avoided</div>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">Recent submissions</span>
+            <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;" onclick="navigate('search')">View all</button>
+          </div>
+          <div class="panel-body" id="dashboard-recent-list">
+            <div style="font-size:12px;color:var(--text3);">Loading recent submissions…</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><span class="panel-title">Active failure clusters</span></div>
+          <div class="panel-body">
+            <div class="trial-row" onclick="navigate('graph')">
+              <span class="trial-name">PD-1/PD-L1 checkpoint blockade — solid tumors</span>
+              <span class="trial-meta" style="color:var(--accent)">38 trials</span>
+            </div>
+            <div class="trial-row" onclick="navigate('graph')">
+              <span class="trial-name">Tau protein targeting — Alzheimer's</span>
+              <span class="trial-meta" style="color:var(--accent)">21 trials</span>
+            </div>
+            <div class="trial-row" onclick="navigate('graph')">
+              <span class="trial-name">PCSK9 inhibition — LDL lowering</span>
+              <span class="trial-meta" style="color:var(--amber)">14 trials</span>
+            </div>
+            <div class="trial-row" onclick="navigate('graph')">
+              <span class="trial-name">sGC stimulators — heart failure with preserved EF</span>
+              <span class="trial-meta" style="color:var(--text3)">9 trials</span>
+            </div>
+            <div class="trial-row" onclick="navigate('graph')">
+              <span class="trial-name">Gut microbiome modulation — T2 diabetes</span>
+              <span class="trial-meta" style="color:var(--text3)">7 trials</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAILURE SUMMARY PAGE -->
+    <div class="page" id="page-graph">
+      <div class="page-header">
+        <h1>Failure Summary</h1>
+        <p>Patterns across submitted studies — grouped by failure mode, therapeutic area, and result type.</p>
+      </div>
+
+      <!-- Explainer -->
+      <div style="background:linear-gradient(135deg,#dde8f8,#e8f4f0);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:18px;">
+        <div style="font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:6px;">📋 What this page shows</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.8;">
+          This page summarises all submissions in the repository — showing how failures cluster by <strong>failure mode</strong>, <strong>therapeutic area</strong>, and <strong>result type</strong>. Use the filters below to narrow by category. Click any study card to read its full AI-generated summary.
+        </div>
+      </div>
+
+      <!-- Filter chips -->
+      <div class="graph-controls" id="summary-filter-bar">
+        <button class="filter-chip active" data-filter="all" onclick="toggleSummaryChip(this)">All</button>
+        <button class="filter-chip" data-filter="null" onclick="toggleSummaryChip(this)">Null result</button>
+        <button class="filter-chip" data-filter="inconclusive" onclick="toggleSummaryChip(this)">Inconclusive</button>
+        <button class="filter-chip" data-filter="opposite" onclick="toggleSummaryChip(this)">Opposite effect</button>
+      </div>
+
+      <!-- Breakdown stats row -->
+      <div id="summary-stats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;"></div>
+
+      <!-- Failure mode groups -->
+      <div id="summary-groups"></div>
+
+      <div style="margin-top:16px;font-size:11px;color:var(--text3);font-style:italic;">
+        Showing manual submissions, curated failure records from imported sources, and demo data.
+      </div>
+    </div>
+
+    <!-- UPLOAD PAGE -->
+    <div class="page" id="page-upload">
+      <div class="page-header">
+        <h1>Submit a Negative Finding</h1>
+        <p>All submissions receive a citable DOI, contribute to the failure summary, and increment your NF-index.</p>
+      </div>
+
+      <!-- Step indicator -->
+      <div class="step-bar">
+        <div class="step active" id="step-ind-1" onclick="goStep(1)"><span class="step-num">1</span><span class="step-label">Study identity</span></div>
+        <div class="step-line"></div>
+        <div class="step" id="step-ind-2" onclick="goStep(2)"><span class="step-num">2</span><span class="step-label">Upload documents</span></div>
+        <div class="step-line"></div>
+        <div class="step" id="step-ind-3" onclick="goStep(3)"><span class="step-num">3</span><span class="step-label">Methods & results</span></div>
+        <div class="step-line"></div>
+        <div class="step" id="step-ind-4" onclick="goStep(4)"><span class="step-num">4</span><span class="step-label">Supplemental materials</span></div>
+        <div class="step-line"></div>
+        <div class="step" id="step-ind-5" onclick="goStep(5)"><span class="step-num">5</span><span class="step-label">Review & submit</span></div>
+        <div class="step-line"></div>
+        <div class="step" id="step-ind-6"><span class="step-num">6</span><span class="step-label">AI Summary</span></div>
+      </div>
+
+      <div class="upload-layout" id="upload-layout">
+        <div id="upload-form-col">
+
+          <!-- ═══ STEP 1: Study Identity ═══ -->
+          <div class="form-step active" id="form-step-1">
+            <div class="form-card">
+              <div class="form-section-title">Study identity</div>
+              <div class="field-row">
+                <div class="field">
+                  <label>Study type</label>
+                  <select onchange="updatePreview()" id="f-type">
+                    <option>Randomized clinical trial</option>
+                    <option>Non-randomized controlled trial</option>
+                    <option>Observational (cohort)</option>
+                    <option>Observational (case-control)</option>
+                    <option>Cross-sectional</option>
+                    <option>Preclinical (in vivo)</option>
+                    <option>Preclinical (in vitro)</option>
+                    <option>Systematic review / meta-analysis</option>
+                    <option>Basket / platform trial</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Trial phase</label>
+                  <select onchange="updatePreview()" id="f-phase">
+                    <option>Phase III</option><option>Phase II/III</option>
+                    <option>Phase II</option><option>Phase I/II</option>
+                    <option>Phase I</option><option>Phase IV</option>
+                    <option>Not applicable</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label>Full study title</label>
+                <input type="text" id="f-title" placeholder="e.g. VEGF-A inhibition plus standard of care vs placebo in treatment-resistant glioblastoma" oninput="updatePreview()"/>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label>ClinicalTrials.gov ID (if applicable)</label>
+                  <input type="text" id="f-nct" placeholder="NCT00000000" oninput="updatePreview()"/>
+                </div>
+                <div class="field">
+                  <label>Other registry ID</label>
+                  <input type="text" placeholder="EudraCT / ISRCTN / ANZCTR"/>
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label>Sponsoring institution</label>
+                  <input type="text" placeholder="e.g. Memorial Sloan Kettering"/>
+                </div>
+                <div class="field">
+                  <label>Funding source</label>
+                  <select>
+                    <option>Academic / government grant</option>
+                    <option>Industry funded</option>
+                    <option>Mixed (academic + industry)</option>
+                    <option>Investigator-initiated</option>
+                    <option>Charity / foundation</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label>Publication status</label>
+                <select>
+                  <option>Unpublished — depositing here only</option>
+                  <option>Preprint (provide link below)</option>
+                  <option>Published in journal (provide DOI below)</option>
+                  <option>Under review</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Existing DOI or preprint link (if any)</label>
+                <input type="text" placeholder="https://doi.org/... or https://medrxiv.org/..."/>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:8px">
+                <button class="btn btn-primary" style="flex:1" onclick="goStep(2)">Next: Upload documents →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══ STEP 2: Upload Primary Documents ═══ -->
+          <div class="form-step" id="form-step-2">
+
+            <!-- Explainer banner -->
+            <div style="background:var(--pastel-blue);background:linear-gradient(135deg,#dde8f8,#e8f4f0);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:16px;">
+              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">⚡ Upload your study documents here — the AI will do the rest</div>
+              <div style="font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:10px">
+                Upload any combination of your <strong>manuscript, study protocol, and/or results report</strong>. You can upload multiple files at once. The AI will read all of them together and automatically populate the fields in <strong>Step 3 (Methods &amp; Results)</strong> — including study design, sample size, outcomes, statistics, adverse events, and limitations.<br/><br/>
+                After uploading, you'll still walk through Step 3 to <strong>review every populated field, correct anything the AI got wrong, and fill in anything it missed</strong>. Think of this as a first draft, not a final answer.<br/><br/>
+                <strong>This step is optional.</strong> If you prefer to enter everything manually, just click "Skip — I'll enter details manually" below.
+              </div>
+              <div style="font-size:11px;color:var(--text3);background:rgba(255,255,255,0.6);border-radius:var(--radius);padding:8px 12px;margin-bottom:12px;">
+                <strong>What gets auto-populated in Step 3:</strong> Sample size · Randomization &amp; blinding · Therapeutic area · Intervention &amp; comparator · Patient population · Dropout rate · Demographics · Primary &amp; secondary outcomes · p-values · Effect estimates · Adverse events · Key limitations · Hypothesized failure reason
+              </div>
+            </div>
+
+            <!-- Upload dropzone -->
+            <div class="autofill-card" id="autofill-card" style="margin-bottom:14px">
+              <div class="autofill-icon">📂</div>
+              <div class="autofill-body">
+                <div class="autofill-title">Upload manuscript, protocol, and/or results report</div>
+                <div class="autofill-sub" style="margin-bottom:10px">Multiple files accepted (PDF or DOCX). The AI will read all uploaded files together to populate your methods &amp; results fields.</div>
+                <div class="autofill-dropzone" id="af-dz" ondragover="dzDrag(event,this)" ondragleave="dzLeave(this)" ondrop="afDrop(event)" onclick="document.getElementById('af-input').click()">
+                  <input type="file" id="af-input" accept=".pdf,.doc,.docx" multiple style="display:none" onchange="afFileChosen(this)"/>
+                  <span id="af-dz-text">Drop PDF or DOCX files here, or click to browse — multiple files accepted</span>
+                </div>
+                <div id="af-status" style="display:none">
+                  <div class="autofill-progress"><div class="autofill-progress-bar" id="af-bar"></div></div>
+                  <div class="autofill-status-text" id="af-status-text">Reading documents…</div>
+                </div>
+                <div id="af-done" style="display:none" class="autofill-done">✓ Documents uploaded — fields in Step 3 will be pre-populated. Review and correct them before submitting.</div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:10px;margin-top:4px">
+              <button class="btn btn-ghost" onclick="goStep(1)">← Back</button>
+              <button class="btn btn-ghost" style="flex:1" onclick="skipUpload()">Skip — I'll enter details manually →</button>
+              <button class="btn btn-primary" onclick="goStep(3)">Documents uploaded — continue →</button>
+            </div>
+          </div>
+
+          <!-- ═══ STEP 3: Methods & Results ═══ -->
+          <div class="form-step" id="form-step-3">
+
+            <!-- Smart instruction banner — changes based on whether docs were uploaded -->
+            <div id="methods-banner-uploaded" style="display:none;background:linear-gradient(135deg,#dde8f8,#e8f0f8);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:14px 18px;margin-bottom:16px;">
+              <div style="font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px">✅ Fields below have been pre-populated from your uploaded documents</div>
+              <div style="font-size:12px;color:var(--text2);line-height:1.7;">Please <strong>review every field carefully</strong>. AI extraction is helpful but not perfect — it may misread numbers, miss nuance, or leave fields blank if the information wasn't clearly stated in your documents. Correct anything that's wrong and fill in anything that's missing before continuing.</div>
+            </div>
+            <div id="methods-banner-manual" style="background:linear-gradient(135deg,#e8f4f0,#f0f8e8);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:14px 18px;margin-bottom:16px;">
+              <div style="font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px">📝 Enter your methods and results below</div>
+              <div style="font-size:12px;color:var(--text2);line-height:1.7;">Fill in as much detail as you can — the more complete your entries, the stronger and more accurate the AI summary will be. All fields are optional, but richer input leads to richer output. If you realize you have a document you'd like to upload instead, <button onclick="goStep(2)" style="background:none;border:none;color:var(--accent);font-weight:600;cursor:pointer;font-size:12px;padding:0;text-decoration:underline;">go back to Step 2</button>.</div>
+            </div>
+            <div class="form-card" style="margin-bottom:14px">
+              <div class="form-section-title">Study design <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text3);font-family:var(--font-sans);font-size:10px">— enter any applicable information</span></div>
+              <div class="field-row">
+                <div class="field">
+                  <label>Sample size enrolled (n)</label>
+                  <input type="text" id="f-n" placeholder="e.g. 340" oninput="updatePreview()"/>
+                </div>
+                <div class="field">
+                  <label>Planned n (power calculation)</label>
+                  <input type="text" id="f-nplan" placeholder="e.g. 400 (80% power)"/>
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label>Randomization &amp; blinding</label>
+                  <select id="f-design">
+                    <option>Double-blind RCT — 1:1</option>
+                    <option>Double-blind RCT — other ratio</option>
+                    <option>Single-blind RCT</option>
+                    <option>Open-label RCT</option>
+                    <option>Non-randomized</option>
+                    <option>Not applicable</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Therapeutic area</label>
+                  <select id="f-area" onchange="updatePreview()">
+                    <option>Oncology</option><option>Neurology</option>
+                    <option>Cardiology</option><option>Immunology</option>
+                    <option>Hepatology</option><option>Psychiatry</option>
+                    <option>Infectious disease</option><option>Endocrinology</option>
+                    <option>Respiratory</option><option>Rare disease</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label>Intervention &amp; comparator</label>
+                <textarea id="f-intervention" placeholder="Drug name, dose, route, duration. Include comparator arm." style="min-height:60px" oninput="updatePreview()"></textarea>
+              </div>
+              <div class="field">
+                <label>Patient population</label>
+                <textarea id="f-population" placeholder="Key inclusion/exclusion criteria and enrollment context." style="min-height:60px"></textarea>
+              </div>
+              <div class="field-row">
+                <div class="field"><label>Dropout rate</label><input type="text" id="f-dropout" placeholder="e.g. 14%"/></div>
+                <div class="field"><label>% female</label><input type="text" id="f-female" placeholder="e.g. 48%"/></div>
+                <div class="field"><label>Median age</label><input type="text" id="f-age" placeholder="e.g. 58 yrs"/></div>
+              </div>
+            </div>
+
+            <div class="form-card">
+              <div class="form-section-title">Result classification</div>
+              <div class="result-selector" id="result-selector">
+                <div class="result-opt" onclick="selectResult('null',this)">Null<br/><span style="font-size:10px;color:var(--text3)">No significant effect</span></div>
+                <div class="result-opt" onclick="selectResult('inconclusive',this)">Inconclusive<br/><span style="font-size:10px;color:var(--text3)">Insufficient power</span></div>
+                <div class="result-opt" onclick="selectResult('opposite',this)">Opposite<br/><span style="font-size:10px;color:var(--text3)">Contrary to hypothesis</span></div>
+              </div>
+
+              <div class="form-section-title" style="margin-top:18px">Primary outcome</div>
+              <div class="field">
+                <label>Pre-specified primary endpoint</label>
+                <input type="text" id="f-outcome" placeholder="e.g. Overall survival at 24 months" oninput="updatePreview()"/>
+              </div>
+              <div class="field-row">
+                <div class="field"><label>Primary p-value</label><input type="text" id="f-pval" placeholder="e.g. p = 0.43" oninput="updatePreview()"/></div>
+                <div class="field">
+                  <label>Effect estimate</label>
+                  <input type="text" id="f-es" placeholder="e.g. HR 1.02 (95% CI 0.88–1.18)" oninput="updatePreview()"/>
+                </div>
+              </div>
+              <div class="field">
+                <label>Secondary outcomes (summary)</label>
+                <textarea placeholder="e.g. PFS HR 1.05 (p=0.61); ORR 12% vs 11% (p=0.84)" style="min-height:56px"></textarea>
+              </div>
+              <div class="field-row">
+                <div class="field"><label>Grade 3–4 adverse events</label><input type="text" placeholder="e.g. 28% vs 14%"/></div>
+                <div class="field"><label>Treatment-related deaths</label><input type="text" placeholder="e.g. 2 (1.2%)"/></div>
+              </div>
+              <div class="field">
+                <label>Key limitations</label>
+                <textarea id="f-limits" placeholder="Methodological limitations, underpowering, dropout, etc." style="min-height:70px" oninput="updatePreview()"></textarea>
+              </div>
+              <div class="field">
+                <label>Hypothesized reason for failure</label>
+                <select oninput="updatePreview()">
+                  <option>Target validity — mechanism not rate-limiting in this indication</option>
+                  <option>Patient selection — population too heterogeneous or wrong biomarker</option>
+                  <option>Dosing / pharmacokinetics — insufficient exposure at target site</option>
+                  <option>Underpowered — type II error likely</option>
+                  <option>Outcome measurement — endpoint did not capture true biological effect</option>
+                  <option>Off-target effects — confounding mechanism</option>
+                  <option>Timing — intervention started too late in disease course</option>
+                  <option>Unknown / unclear</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Anything else you'd like to add</label>
+                <textarea id="f-notes" placeholder="Add any context, observations, or details not captured in the fields above — e.g. post-hoc analyses, subgroup trends, investigator commentary, protocol deviations, or anything else you feel is relevant to understanding this result." style="min-height:90px"></textarea>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:8px">
+                <button class="btn btn-ghost" onclick="goStep(2)">← Back</button>
+                <button class="btn btn-primary" style="flex:1" onclick="goStep(4)">Next: Supplemental materials →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══ STEP 4: Supplemental Materials ═══ -->
+          <div class="form-step" id="form-step-4">
+
+            <div style="background:linear-gradient(135deg,#f0eefc,#e8f4f0);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:16px;">
+              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">📎 Supplemental materials — optional but encouraged</div>
+              <div style="font-size:12px;color:var(--text2);line-height:1.8;">
+                This step is for any <strong>additional files</strong> that weren't part of your primary documents in Step 2 and that might help the AI generate a stronger, more complete summary. There's no wrong answer here — upload whatever you think is relevant.<br/><br/>
+                <strong>Examples of useful supplemental materials:</strong> statistical analysis plan (SAP), ethics approval, IRB documentation, raw data exports, appendices, subgroup analyses, safety reports, correspondence with regulators, or any other supporting context.<br/><br/>
+                If you already uploaded everything in Step 2, you can skip this step entirely.
+              </div>
+            </div>
+
+            <div class="form-card">
+              <div class="form-section-title">Supplemental file upload <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text3);font-family:var(--font-sans);font-size:10px">— all optional, multiple files accepted</span></div>
+              <div class="field">
+                <label>Statistical analysis plan, ethics approval, appendices, raw data, or other supporting files</label>
+                <div class="drop-zone" id="dz-supp" ondragover="dzDrag(event,this)" ondragleave="dzLeave(this)" ondrop="dzDrop(event,this,'dz-supp','dz-supp-list')" onclick="document.getElementById('fi-supp').click()">
+                  <div class="dz-icon">+</div>
+                  <div class="dz-text">Drag & drop or click to browse — multiple files accepted</div>
+                  <div class="dz-sub">PDF, DOCX, CSV, XLSX, PNG, JPG · No limit on number of files</div>
+                  <input type="file" id="fi-supp" multiple style="display:none" onchange="fileChosen(this,'dz-supp','dz-supp-list')"/>
+                </div>
+                <div class="file-list" id="dz-supp-list"></div>
+              </div>
+
+              <div class="form-section-title" style="margin-top:18px">Visibility &amp; access</div>
+              <div class="field">
+                <label>Access level</label>
+                <select>
+                  <option>Public — immediately visible to all FailUp users</option>
+                  <option>Institutional — visible to verified researchers only</option>
+                  <option>Embargoed — metadata public, full data after embargo period</option>
+                  <option>Private — indexed in the repository but details restricted</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Data sharing statement</label>
+                <textarea placeholder="e.g. De-identified participant-level data available on reasonable request to corresponding author." style="min-height:56px"></textarea>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:8px">
+                <button class="btn btn-ghost" onclick="goStep(3)">← Back</button>
+                <button class="btn btn-primary" style="flex:1" onclick="goStep(5)">Next: Review &amp; submit →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══ STEP 5: Review & Submit ═══ -->
+          <div class="form-step" id="form-step-5">
+            <div class="form-card">
+              <div class="form-section-title">Declaration &amp; submission</div>
+              <div style="border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:16px;font-size:12.5px;color:var(--text2);line-height:1.9;background:var(--surface2)">
+                <div style="font-weight:600;color:var(--text);margin-bottom:10px;font-size:13px">By submitting you confirm:</div>
+                <label style="display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;cursor:pointer">
+                  <input type="checkbox" style="margin-top:3px;flex-shrink:0"/> I am an author or authorized representative for this study
+                </label>
+                <label style="display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;cursor:pointer">
+                  <input type="checkbox" style="margin-top:3px;flex-shrink:0"/> No patient-level identifiable data is included in uploaded files
+                </label>
+                <label style="display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;cursor:pointer">
+                  <input type="checkbox" style="margin-top:3px;flex-shrink:0"/> The AI-generated summary will be reviewed by me before publication
+                </label>
+                <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer">
+                  <input type="checkbox" style="margin-top:3px;flex-shrink:0"/> I agree to FailUp's data sharing and attribution terms
+                </label>
+              </div>
+              <div style="background:var(--accent-dim);border:1px solid var(--border2);border-radius:var(--radius);padding:14px;margin-bottom:16px">
+                <div style="font-family:var(--font-mono);font-size:9px;color:var(--accent);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">On submission you will receive</div>
+                <div style="font-size:12px;color:var(--text2);line-height:2.1">
+                  ✓ Citable DOI (10.5281/fu.xxxxxxx) &nbsp;&nbsp; ✓ ORCID credit entry<br/>
+                  ✓ Repository summary entry created &nbsp;&nbsp; ✓ Transparency badge<br/>
+                  ✓ NF-index incremented &nbsp;&nbsp; ✓ AI summary draft generated<br/>
+                  ✓ Contradiction scan initiated &nbsp;&nbsp; ✓ Ontology auto-tagging
+                </div>
+              </div>
+              <div style="display:flex;gap:10px">
+                <button class="btn btn-ghost" onclick="goStep(4)">← Back</button>
+                <button class="btn btn-primary" style="flex:1;padding:11px" onclick="submitForm()">Generate AI summary &amp; submit →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══ STEP 6: AI Summary Results ═══ -->
+          <div class="form-step" id="form-step-6">
+
+            <!-- Generating state (shown while API call is in flight) -->
+            <div id="summary-generating" style="display:none;text-align:center;padding:48px 24px;">
+              <div style="font-size:32px;margin-bottom:16px;">🤖</div>
+              <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px;">Generating your AI summary…</div>
+              <div style="font-size:12px;color:var(--text2);margin-bottom:24px;">Claude is reading your submission and producing a structured IMRAD-format report. This usually takes 10–20 seconds.</div>
+              <div style="width:240px;margin:0 auto;height:4px;background:var(--border);border-radius:2px;overflow:hidden;">
+                <div id="gen-progress-bar" style="height:100%;width:0%;background:var(--accent);border-radius:2px;transition:width 0.4s ease;"></div>
+              </div>
+              <div id="gen-status-text" style="margin-top:10px;font-size:11px;color:var(--accent);font-family:var(--font-mono);">Sending to Claude…</div>
+            </div>
+
+            <!-- Results state (shown after API call completes) -->
+            <div id="summary-results" style="display:none;">
+              <div style="background:linear-gradient(135deg,#dde8f8,#e8f4f0);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:18px;display:flex;align-items:center;gap:14px;">
+                <div style="font-size:24px;">✅</div>
+                <div>
+                  <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px;">AI summary generated successfully</div>
+                  <div style="font-size:12px;color:var(--text2);">Review the summary below. Your DOI has been assigned and your profile has been updated. You can edit fields and resubmit if anything looks wrong.</div>
+                </div>
+                <div style="margin-left:auto;text-align:right;flex-shrink:0;">
+                  <div style="font-family:var(--font-mono);font-size:10px;color:var(--accent);margin-bottom:2px;">Assigned DOI</div>
+                  <div id="result-doi" style="font-family:var(--font-mono);font-size:11px;color:var(--text);font-weight:600;"></div>
+                </div>
+              </div>
+
+              <div class="form-card">
+                <div class="form-section-title">AI-generated summary — review before publishing</div>
+
+                <div style="display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:18px;">
+                  <div>
+                    <div class="summary-block-label" style="margin-bottom:6px;">Background &amp; objective</div>
+                    <div id="result-background" class="summary-block-text" style="background:var(--surface2);border-radius:var(--radius);padding:12px 16px;line-height:1.9;font-size:13px;"></div>
+                  </div>
+                  <div>
+                    <div class="summary-block-label" style="margin-bottom:6px;">Study plan</div>
+                    <div id="result-study-plan" class="summary-block-text" style="background:var(--surface2);border-radius:var(--radius);padding:12px 16px;line-height:1.9;font-size:13px;"></div>
+                  </div>
+                  <div>
+                    <div class="summary-block-label" style="margin-bottom:6px;">Methods</div>
+                    <div id="result-methods" class="summary-block-text" style="background:var(--surface2);border-radius:var(--radius);padding:12px 16px;line-height:1.9;font-size:13px;"></div>
+                  </div>
+                  <div>
+                    <div class="summary-block-label" style="margin-bottom:6px;">Results summary</div>
+                    <div id="result-findings" class="summary-block-text" style="background:var(--surface2);border-radius:var(--radius);padding:12px 16px;line-height:1.9;font-size:13px;"></div>
+                  </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
+                  <div>
+                    <div class="summary-block-label" style="margin-bottom:6px;">Failure mode (AI-classified)</div>
+                    <div id="result-failure" class="summary-block-text" style="background:var(--surface2);border-radius:var(--radius);padding:12px 16px;line-height:1.8;font-size:13px;height:100%;"></div>
+                  </div>
+                  <div>
+                    <div class="summary-block-label" style="margin-bottom:6px;">Contradiction check</div>
+                    <div id="result-contradiction" class="summary-block-text" style="background:var(--surface2);border-radius:var(--radius);padding:12px 16px;line-height:1.8;font-size:13px;height:100%;"></div>
+                  </div>
+                </div>
+
+                <div style="margin-bottom:18px;">
+                  <div class="summary-block-label" style="margin-bottom:6px;">Main limitation</div>
+                  <div id="result-limitation" class="summary-block-text" style="background:var(--surface2);border-radius:var(--radius);padding:12px 16px;line-height:1.9;font-size:13px;"></div>
+                </div>
+
+                <div style="margin-bottom:20px;">
+                  <div class="summary-block-label" style="margin-bottom:6px;">Study tags (auto-generated)</div>
+                  <div id="result-tags" class="summary-block-text" style="background:var(--accent-dim);border:1px solid var(--border2);border-radius:var(--radius);padding:12px 16px;font-family:var(--font-mono);font-size:12px;color:var(--accent);"></div>
+                </div>
+
+                <div style="display:flex;gap:10px;margin-top:8px;">
+                  <button class="btn btn-ghost" onclick="goStep(5)">← Edit submission</button>
+                  <button class="btn btn-ghost" onclick="navigate('profile')" style="flex:1;">View my profile →</button>
+                  <button class="btn btn-primary" onclick="goStep(1);resetForm()">Submit another finding →</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- RIGHT: AI Summary Preview -->
+        <div id="upload-preview-col">
+          <div class="ai-preview">
+            <div class="ai-preview-title"><div class="ai-dot"></div> Summary structure preview</div>
+            <div id="preview-disclaimer" style="background:var(--pastel-pink);border:1px solid rgba(234,196,213,0.6);border-radius:var(--radius);padding:9px 12px;margin-bottom:14px;font-size:11px;color:var(--text2);line-height:1.6;">
+              <strong style="color:var(--text)">📋 Template preview — manual entry mode.</strong> The structure below reflects what your final summary will look like based on what you've typed so far. The real AI-generated summary runs after you submit.
+            </div>
+            <div class="summary-block">
+              <div class="summary-block-label">Background &amp; objective</div>
+              <div class="summary-block-text" id="prev-background"><span class="summary-placeholder">Complete Step 1 to generate a live preview.</span></div>
+            </div>
+            <div class="summary-block">
+              <div class="summary-block-label">Key findings</div>
+              <div class="summary-block-text" id="prev-findings"><span class="summary-placeholder">Result classification and statistics will appear here.</span></div>
+            </div>
+            <div class="summary-block">
+              <div class="summary-block-label">Repository classification</div>
+              <div class="summary-block-text" id="prev-failure"><span class="summary-placeholder">FailUp will auto-tag by mechanism, target, and population.</span></div>
+            </div>
+            <div class="summary-block">
+              <div class="summary-block-label">Contradiction check</div>
+              <div class="summary-block-text" id="prev-contradiction"><span class="summary-placeholder">AI will scan for conflicting prior positive results.</span></div>
+            </div>
+            <div class="summary-block">
+              <div class="summary-block-label">Study tags (auto-generated)</div>
+              <div class="summary-block-text" id="prev-tags"><span class="summary-placeholder">MeSH terms, ontology IDs, and repository tags and indexing details will appear here.</span></div>
+            </div>
+            <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+              <div class="summary-block-label" style="margin-bottom:6px">NF-index impact</div>
+              <div style="font-size:12px;color:var(--text2)">This submission will increment your <span style="color:var(--accent);font-weight:600">NF-index</span> if it receives ≥1 citation from another FailUp entry.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEARCH PAGE -->
+    <div class="page" id="page-search">
+      <div class="page-header">
+        <h1>Search the failure repository</h1>
+        <p>Query by mechanism, target, pathway, population, or failure pattern — not just by keyword.</p>
+      </div>
+      <div class="search-bar-wrap">
+        <span class="search-icon">◎</span>
+        <input class="search-bar" type="text" placeholder="e.g. "PD-1 checkpoint blockade pancreatic cancer"" oninput="filterResults(this.value)"/>
+      </div>
+      <div class="results-grid" id="results-list">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <!-- PROFILE PAGE -->
+    <div class="page" id="page-profile">
+
+      <!-- Profile header -->
+      <div class="profile-header">
+        <div class="avatar">SR</div>
+        <div style="flex:1">
+          <div class="profile-name">Dr. Sophia Renard</div>
+          <div class="profile-meta">Oncology · Memorial Sloan Kettering · ORCID 0000-0002-4821-3394</div>
+          <div class="profile-meta" style="margin-top:4px">PhD, MD · Principal Investigator · 14 years research experience</div>
+          <div class="badges-grid">
+            <div class="badge earned"><span class="badge-icon">◈</span> Transparency Pioneer</div>
+            <div class="badge earned"><span class="badge-icon">⬡</span> 5 Null Results</div>
+            <div class="badge earned"><span class="badge-icon">↑</span> Early Adopter</div>
+            <div class="badge earned"><span class="badge-icon">◉</span> Contradiction Hunter</div>
+            <div class="badge"><span class="badge-icon">◎</span> 10 Null Results</div>
+            <div class="badge"><span class="badge-icon">★</span> Repository Contributor</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NF-INDEX HERO CARD -->
+      <div class="nf-index-card" style="margin-bottom:20px">
+  <div class="nf-index-left">
+    <div class="nf-index-label">NF-index</div>
+    <div class="nf-index-score" id="nf-index-score">0</div>
+    <div class="nf-index-sub" id="nf-index-sub">0 negative findings each cited ≥0 times</div>
+  </div>
+  <div class="nf-index-right">
+    <div class="nf-index-explain-title">How the NF-index works</div>
+    <div class="nf-index-explain" id="nf-index-explain">
+      Analogous to the h-index, your <strong>NF-index</strong> is the largest number <em>n</em> such that you have published <em>n</em> negative findings that have each been cited at least <em>n</em> times within FailUp.
+      <br/><br/>
+      A citation occurs when another researcher's submission references your finding as prior evidence, a failed comparator, or a contradiction. It rewards <em>impact of negative work</em>, not just volume.
+    </div>
+    <div class="nf-breakdown" id="nf-breakdown">
+      <div style="font-size:11px;color:var(--text3);font-style:italic;">
+        No saved submissions yet.
+      </div>
+    </div>
+    <div id="nf-next-milestone" style="font-size:11px;color:var(--text3);margin-top:10px">
+      Submit findings to begin building your NF-index.
+    </div>
+  </div>
+</div>
+
+      <!-- Stats grid -->
+      <div class="metrics-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
+        <div class="metric-card accent">
+          <div class="metric-label">NF-index</div>
+          <div class="metric-val" id="profile-nf-index">4</div>
+          <div class="metric-sub">transparency impact score</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Submissions</div>
+          <div class="metric-val" id="profile-submissions">4</div>
+          <div class="metric-sub">negative findings shared</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Total citations</div>
+          <div class="metric-val" id="profile-citations">26</div>
+          <div class="metric-sub">across all submissions</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Contradictions found</div>
+          <div class="metric-val" style="color:var(--red)" id="profile-contradictions">1</div>
+          <div class="metric-sub">flagged by your submissions</div>
+        </div>
+      </div>
+
+      <!-- Contributions table -->
+      <div class="panel" style="margin-bottom:18px">
+        <div class="panel-head">
+          <span class="panel-title">My contributions</span>
+          <span id="profile-contrib-summary" style="font-size:11px;color:var(--text3);font-family:var(--font-mono)">4 submissions · 26 total citations</span>
+        </div>
+        <div class="panel-body" style="padding:0">
+          <table class="contributions-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Phase</th>
+                <th>DOI</th>
+                <th>Citations</th>
+                <th>NF contribution</th>
+                <th>Submitted</th>
+              </tr>
+            </thead>
+            <tbody id="contributions-tbody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Activity & impact panels -->
+      <div class="dash-grid">
+        <div class="panel">
+          <div class="panel-head"><span class="panel-title">Recent citation activity</span></div>
+          <div class="panel-body" id="citation-activity-list">
+            <div class="trial-row">
+              <span class="trial-name" style="font-size:12px">Zhang et al. cited your VEGF-A/GBM finding as prior failed comparator</span>
+              <span class="trial-meta">3 months ago</span>
+            </div>
+            <div class="trial-row">
+              <span class="trial-name" style="font-size:12px">BEACON-3 trial submission references your mTOR null result</span>
+              <span class="trial-meta">4 months ago</span>
+            </div>
+            <div class="trial-row">
+              <span class="trial-name" style="font-size:12px">Contradiction flagged: your PD-L1 result vs Kim et al. 2023 positive</span>
+              <span class="trial-meta" style="color:var(--red)">5 months ago</span>
+            </div>
+            <div class="trial-row">
+              <span class="trial-name" style="font-size:12px">mTOR/HR+ submission added to an Oncology failure cluster — 12 related studies</span>
+              <span class="trial-meta">6 months ago</span>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><span class="panel-title">NF-index trajectory</span></div>
+          <div class="panel-body">
+            <div style="font-family:var(--font-mono);font-size:10px;color:var(--text3);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.08em">Score over time</div>
+            <div style="display:flex;align-items:flex-end;gap:6px;height:80px;margin-bottom:8px">
+              <div style="flex:1;background:var(--accent-dim);border-radius:3px 3px 0 0;height:20%;display:flex;align-items:flex-end;justify-content:center"><span style="font-size:9px;color:var(--text3);padding-bottom:4px">1</span></div>
+              <div style="flex:1;background:var(--accent-dim);border-radius:3px 3px 0 0;height:20%;display:flex;align-items:flex-end;justify-content:center"><span style="font-size:9px;color:var(--text3);padding-bottom:4px">1</span></div>
+              <div style="flex:1;background:var(--accent-dim);border-radius:3px 3px 0 0;height:50%;display:flex;align-items:flex-end;justify-content:center"><span style="font-size:9px;color:var(--text3);padding-bottom:4px">2</span></div>
+              <div style="flex:1;background:var(--accent-dim);border-radius:3px 3px 0 0;height:75%;display:flex;align-items:flex-end;justify-content:center"><span style="font-size:9px;color:var(--text3);padding-bottom:4px">3</span></div>
+              <div style="flex:1;background:var(--accent);border-radius:3px 3px 0 0;height:100%;display:flex;align-items:flex-end;justify-content:center"><span style="font-size:9px;color:#ffffff;padding-bottom:4px;font-weight:600">4</span></div>
+            </div>
+            <div style="display:flex;gap:6px;font-size:10px;color:var(--text3)">
+              <div style="flex:1;text-align:center">Nov 24</div>
+              <div style="flex:1;text-align:center">Dec 24</div>
+              <div style="flex:1;text-align:center">Jan 25</div>
+              <div style="flex:1;text-align:center">Feb 25</div>
+              <div style="flex:1;text-align:center">Mar 25</div>
+            </div>
+            <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-size:12px;color:var(--text2)">
+              <span style="color:var(--accent)">Top 8%</span> of FailUp researchers by NF-index. Field average: 1.2
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-title" id="toast-title">Success</div>
+  <div id="toast-body">Your finding has been submitted.</div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('modal').classList.remove('open')">✕</button>
+    <div class="modal-title" id="modal-title">Study detail</div>
+    <div class="modal-sub" id="modal-sub"></div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ── NAVIGATION ──
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const titles = { welcome:'Welcome to FailUp', dashboard:'Dashboard', graph:'Failure Summary', upload:'Submit Finding', search:'Search', profile:'My Profile' };
+  document.getElementById('topbar-title').textContent = titles[page] || page;
+  const navItems = document.querySelectorAll('.nav-item');
+  const idx = { welcome:0, dashboard:1, graph:2, upload:3, search:4, profile:5 };
+  if (idx[page] !== undefined) navItems[idx[page]].classList.add('active');
+  if (page === 'graph') renderFailureSummary();
+  if (page === 'search') renderResults('');
+}
+
+// ── FAILURE SUMMARY ──
+let activeSummaryFilter = 'all';
+
+const sourceLabels = {
+  manual:           'Manual submission',
+  ctgov_imported:   'Imported CT.gov',
+  ctgov_enriched:   'AI-tagged CT.gov',
+  ctgov_curated:    'Curated failure record (CT.gov)',
+  pubmed_imported:  'Imported PubMed',
+  pubmed_enriched:  'AI-tagged PubMed',
+  pubmed_curated:   'Curated failure record (PubMed)'
+};
+
+const demoSummaryData = [
+  { title:'VEGF-A inhibition in treatment-resistant glioblastoma', result_type:'null', therapeutic_area:'Oncology', failure_mode:'Target validity — mechanism not rate-limiting in this indication', background:'Bevacizumab plus standard of care was hypothesised to sustain anti-angiogenic pressure in recurrent GBM. Phase III RCT, n=340.', study_plan:'Phase III randomized comparison of bevacizumab plus standard therapy versus placebo plus standard therapy in recurrent GBM.', methods:'Adults with recurrent GBM were randomized and followed for overall survival, with planned comparison of efficacy and secondary tumor-control outcomes.', findings:'Primary endpoint (OS at 24 months) not met: HR 1.02 (95% CI 0.88–1.18), p=0.43. No significant difference in PFS or ORR.', main_limitation:'Anti-angiogenic effect did not translate across the blood–brain barrier in this population. Study may have been underpowered (n=340 vs planned n=400).', contradiction_check:'No contradictions detected. Consistent with two prior Phase II null results in this population.', graph_tags:{ mechanism:'Anti-angiogenesis', target:'VEGF-A', population:'Recurrent GBM adults', therapeutic_area:'Oncology' } },
+  { title:'β-glucan supplementation in post-COVID fatigue syndrome', result_type:'opposite', therapeutic_area:'Immunology', failure_mode:'Off-target effects — confounding mechanism', background:'β-glucan was hypothesised to reduce fatigue via immunomodulation in post-COVID syndrome. Crossover RCT, n=120.', study_plan:'Randomized crossover trial testing β-glucan supplementation against control in adults with post-COVID fatigue.', methods:'Participants crossed between treatment conditions and fatigue scores were assessed over 12 weeks to evaluate symptom improvement.', findings:'Opposite effect observed: 12% worsening of fatigue scores at 12 weeks in β-glucan arm (p=0.03).', main_limitation:'Possible immune overstimulation in post-COVID neuroinflammatory context. Crossover design may have introduced carry-over bias.', contradiction_check:'Contradiction flagged — three prior observational studies reported benefit in healthy populations. AI flagged for editorial review.', graph_tags:{ mechanism:'Immunomodulation', target:'β-glucan receptor', population:'Post-COVID adults', therapeutic_area:'Immunology' } },
+  { title:'Ketamine micro-dosing in treatment-resistant bipolar depression', result_type:'inconclusive', therapeutic_area:'Psychiatry', failure_mode:'Underpowered — type II error likely', background:'Micro-dose ketamine (0.1mg/kg) trialled as mood stabiliser adjunct in bipolar I/II with treatment-resistant depression. Phase II, n=62.', study_plan:'Phase II study designed to test whether adjunctive ketamine micro-dosing improved depressive symptoms in treatment-resistant bipolar disorder.', methods:'Participants with bipolar I/II depression were enrolled into a small efficacy study using MADRS change as a key outcome, but recruitment fell short of the planned sample size.', findings:'MADRS improvement trend observed (−4.2 points) but CI crosses null (p=0.11). Study required n=180 for 80% power.', main_limitation:'Critically underpowered — enrolled 62 of 180 required participants. Dropout rate 22% further reduced effective sample.', contradiction_check:'No contradictions detected. Consistent with mixed ketamine literature in this subpopulation.', graph_tags:{ mechanism:'NMDA receptor antagonism', target:'NMDA receptor', population:'Bipolar I/II adults', therapeutic_area:'Psychiatry' } },
+  { title:'IL-6 receptor blockade in non-alcoholic steatohepatitis', result_type:'null', therapeutic_area:'Hepatology', failure_mode:'Target validity — mechanism not rate-limiting in this indication', background:'IL-6 receptor blockade hypothesised to reduce hepatic inflammation and fibrosis in NASH. Phase II, n=210.', findings:'No significant reduction in liver fibrosis at 48 weeks (p=0.38). Histological endpoints unchanged across arms.', main_limitation:'IL-6 pathway may not be rate-limiting in NASH progression. Biopsy-based endpoints introduce sampling variability.', contradiction_check:'No contradictions detected.', graph_tags:{ mechanism:'IL-6 receptor blockade', target:'IL-6R', population:'NASH adults with F2–F3 fibrosis', therapeutic_area:'Hepatology' } },
+  { title:'mTOR pathway inhibition in HR+ breast cancer — adjuvant setting', result_type:'null', therapeutic_area:'Oncology', failure_mode:'Patient selection — population too heterogeneous or wrong biomarker', background:'Everolimus added to standard adjuvant endocrine therapy in unselected HR+ breast cancer. Phase III, n=1,240.', findings:'Disease-free survival HR 0.97 (95% CI 0.84–1.12, p=0.71). No improvement in unselected population.', main_limitation:'Biomarker-unselected population — mTOR pathway activation not confirmed prior to enrolment. Effect may exist in a molecular subgroup.', contradiction_check:'Contradiction flagged — prior Phase II data suggested benefit in PIK3CA-mutant subgroup. AI flagged for subgroup analysis review.', graph_tags:{ mechanism:'mTOR pathway inhibition', target:'mTORC1', population:'HR+ breast cancer, adjuvant', therapeutic_area:'Oncology' } },
+  { title:'Tau-targeting immunotherapy in early Alzheimer\'s disease', result_type:'inconclusive', therapeutic_area:'Neurology', failure_mode:'Outcome measurement — endpoint did not capture true biological effect', background:'Anti-tau antibody in early Alzheimer\'s disease. Phase II, n=280. CSF tau used as pharmacodynamic marker.', findings:'CSF tau reduced 18% (p=0.04) but cognitive endpoints (ADAS-Cog) showed no improvement at 18 months.', main_limitation:'Biomarker-clinical dissociation — target engagement confirmed but cognitive benefit unclear. Trial duration may have been insufficient.', contradiction_check:'No contradictions detected.', graph_tags:{ mechanism:'Tau immunotherapy', target:'Tau protein', population:'Early AD, MCI stage', therapeutic_area:'Neurology' } },
+];
+
+function getAllSummaryData() {
+  const fromSaved = (savedSubmissions || []).map(sub => ({
+    title: sub.title || 'Untitled',
+    result_type: (sub.result_type || 'null').toLowerCase(),
+    therapeutic_area: sub.summary?.graph_tags?.therapeutic_area || 'Unspecified',
+    failure_mode: sub.summary?.failure_mode || 'Unknown / unclear',
+    background: sub.summary?.background || '',
+    study_plan: sub.summary?.study_plan || '',
+    methods: sub.summary?.methods || '',
+    findings: sub.summary?.findings || '',
+    main_limitation: sub.summary?.main_limitation || '',
+    contradiction_check: sub.summary?.contradiction_check || '',
+    graph_tags: sub.summary?.graph_tags || {},
+    source: 'manual'
+  }));
+
+  const fromCtgov = (importedTrials || [])
+    .filter(trial => {
+      const c = trial.curation || {};
+      return c.review_status === 'curated_failure' && c.graph_worthy === true;
+    })
+    .map(trial => ({
+      title: trial.title || trial.nct_id || 'Untitled CT.gov trial',
+      result_type: (trial.curation?.failure_class || trial.result_type || 'inconclusive').toLowerCase(),
+      therapeutic_area: trial.summary?.graph_tags?.therapeutic_area || (trial.conditions || [])[0] || 'Unspecified',
+      failure_mode: trial.summary?.failure_mode || 'Unknown / unclear',
+      background: trial.summary?.background || trial.brief_summary || '',
+      study_plan: trial.summary?.study_plan || '',
+      methods: trial.summary?.methods || '',
+      findings: trial.summary?.findings || trial.brief_summary || '',
+      main_limitation: trial.summary?.main_limitation || '',
+      contradiction_check: trial.summary?.contradiction_check || '',
+      graph_tags: trial.summary?.graph_tags || {},
+      source: 'ctgov_curated'
+    }));
+
+  const fromPubmed = (importedPubmed || [])
+    .filter(article => {
+      const c = article.curation || {};
+      return c.review_status === 'curated_failure' && c.graph_worthy === true;
+    })
+    .map(article => ({
+      title: article.title || article.pmid || 'Untitled PubMed article',
+      result_type: (article.curation?.failure_class || article.result_type || 'inconclusive').toLowerCase(),
+      therapeutic_area: article.summary?.graph_tags?.therapeutic_area || (article.mesh_terms || [])[0] || 'Unspecified',
+      failure_mode: article.summary?.failure_mode || 'Unknown / unclear',
+      background: article.summary?.background || article.abstract || '',
+      study_plan: article.summary?.study_plan || '',
+      methods: article.summary?.methods || '',
+      findings: article.summary?.findings || article.abstract || '',
+      main_limitation: article.summary?.main_limitation || '',
+      contradiction_check: article.summary?.contradiction_check || '',
+      graph_tags: article.summary?.graph_tags || {},
+      source: 'pubmed_curated'
+    }));
+
+  return [...fromSaved, ...fromCtgov, ...fromPubmed, ...demoSummaryData];
+}
+
+function renderFailureSummary() {
+  const all = getAllSummaryData();
+  const filtered = activeSummaryFilter === 'all'
+    ? all
+    : all.filter(s => normalizeType(s.result_type) === activeSummaryFilter);
+
+  // Stats row
+  const statsEl = document.getElementById('summary-stats');
+  if (statsEl) {
+    const counts = { null:0, inconclusive:0, opposite:0 };
+    all.forEach(s => { const t = normalizeType(s.result_type); if (counts[t] !== undefined) counts[t]++; });
+    const contradictions = all.filter(s => s.contradiction_check && !s.contradiction_check.toLowerCase().includes('no contradiction')).length;
+    statsEl.innerHTML = [
+      { label:'Total studies', val: all.length, color:'var(--accent)' },
+      { label:'Null results', val: counts.null, color:'#60a5fa' },
+      { label:'Inconclusive', val: counts.inconclusive, color:'#fbbf24' },
+      { label:'Opposite effects', val: counts.opposite, color:'var(--pastel-pink)' },
+    ].map(s => `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;">
+        <div style="font-family:var(--font-mono);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">${s.label}</div>
+        <div style="font-family:var(--font-serif);font-size:28px;font-weight:600;color:${s.color};line-height:1;">${s.val}</div>
+      </div>`).join('');
+  }
+
+  // Group by failure mode
+  const groupsEl = document.getElementById('summary-groups');
+  if (!groupsEl) return;
+
+  if (!filtered.length) {
+    groupsEl.innerHTML = `<div style="font-size:13px;color:var(--text3);padding:24px 0;">No studies match the current filter.</div>`;
+    return;
+  }
+
+  const groups = {};
+  filtered.forEach(s => {
+    const mode = s.failure_mode || 'Unknown / unclear';
+    if (!groups[mode]) groups[mode] = [];
+    groups[mode].push(s);
+  });
+
+  const typeColors = { null:'#60a5fa', inconclusive:'#e6a817', opposite:'#c47090' };
+  const typeLabels = { null:'Null', inconclusive:'Inconclusive', opposite:'Opposite' };
+
+  groupsEl.innerHTML = Object.entries(groups).map(([mode, studies]) => `
+    <div style="margin-bottom:24px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid var(--border);">
+        <div style="background:var(--accent-dim);border:1px solid var(--border2);border-radius:var(--radius);padding:4px 10px;font-family:var(--font-mono);font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;">
+          ${escapeHtml(mode.split('—')[0].trim())}
+        </div>
+        <div style="font-size:12px;font-weight:600;color:var(--text);">${escapeHtml(mode)}</div>
+        <div style="margin-left:auto;font-size:11px;color:var(--text3);font-family:var(--font-mono);">${studies.length} study${studies.length !== 1 ? ' | studies' : ''}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;">
+        ${studies.map((s, i) => {
+          const type = normalizeType(s.result_type);
+          const color = typeColors[type] || '#8a9ab8';
+          const hasContradiction = s.contradiction_check && !s.contradiction_check.toLowerCase().startsWith('no contradiction') && !s.contradiction_check.toLowerCase().includes('not assessed');
+          return `
+          <div onclick="openSummaryCard(${JSON.stringify(s).replace(/"/g, '&quot;')})" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s;" onmouseover="this.style.borderColor='${color}';this.style.boxShadow='0 2px 12px rgba(0,0,0,0.06)'" onmouseout="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+            <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;">
+              <span style="flex-shrink:0;padding:2px 8px;border-radius:4px;font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.07em;background:${color}22;color:${color};border:1px solid ${color}44;">${typeLabels[type] || type}</span>
+              ${hasContradiction ? '<span style="flex-shrink:0;padding:2px 8px;border-radius:4px;font-family:var(--font-mono);font-size:9px;background:rgba(176,96,128,0.12);color:var(--red);border:1px solid rgba(176,96,128,0.25);">⚠ Contradiction</span>' : ''}
+            </div>
+            <div style="font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:8px;line-height:1.4;">${escapeHtml(s.title)}</div>
+            <div style="font-size:11.5px;color:var(--text2);line-height:1.7;margin-bottom:10px;">${escapeHtml((s.findings || '').substring(0, 160))}${(s.findings || '').length > 160 ? '…' : ''}</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-family:var(--font-mono);font-size:10px;color:var(--text3);">${escapeHtml(s.graph_tags?.therapeutic_area || s.therapeutic_area || '')}</span>
+              <span style="font-size:11px;color:var(--accent);">Read summary →</span>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function openSummaryCard(s) {
+  if (typeof s === 'string') { try { s = JSON.parse(s); } catch(e) { return; } }
+  const type = normalizeType(s.result_type);
+  const typeColors = { null:'#60a5fa', inconclusive:'#e6a817', opposite:'#c47090' };
+  const color = typeColors[type] || '#8a9ab8';
+  document.getElementById('modal-title').textContent = s.title || 'Study summary';
+  document.getElementById('modal-sub').textContent = `${s.therapeutic_area || ''} · ${s.result_type || ''} result`;
+  document.getElementById('modal-body').innerHTML = `
+    <div class="modal-section"><div class="modal-section-label">Background</div>${escapeHtml(s.background || 'Not available.')}</div>
+    <div class="modal-section"><div class="modal-section-label">Study plan</div>${escapeHtml(s.study_plan || 'Not available.')}</div>
+    <div class="modal-section"><div class="modal-section-label">Methods</div>${escapeHtml(s.methods || 'Not available.')}</div>
+    <div class="modal-section"><div class="modal-section-label">Key findings</div>${escapeHtml(s.findings || 'Not available.')}</div>
+    <div class="modal-section"><div class="modal-section-label">Main limitation</div>${escapeHtml(s.main_limitation || 'Not available.')}</div>
+    <div class="modal-section"><div class="modal-section-label">Failure mode</div>${escapeHtml(s.failure_mode || 'Not available.')}</div>
+    <div class="modal-section"><div class="modal-section-label">Contradiction check</div>${escapeHtml(s.contradiction_check || 'Not available.')}</div>
+    <div class="modal-section"><div class="modal-section-label">Tags</div>
+      <span style="font-family:var(--font-mono);font-size:11px;color:var(--accent);">
+        Mechanism: ${escapeHtml(s.graph_tags?.mechanism || 'unspecified')} ·
+        Target: ${escapeHtml(s.graph_tags?.target || 'unspecified')} ·
+        Population: ${escapeHtml(s.graph_tags?.population || 'unspecified')}
+      </span>
+    </div>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+function toggleSummaryChip(el) {
+  document.querySelectorAll('#summary-filter-bar .filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  activeSummaryFilter = el.dataset.filter || 'all';
+  renderFailureSummary();
+}
+
+window.addEventListener('resize', () => {
+  if (document.getElementById('page-graph').classList.contains('active')) renderFailureSummary();
+});
+
+window.addEventListener('load', () => {
+  // no canvas listener needed
+});
+
+// ── STEP NAVIGATION ──
+let currentStep = 1;
+let documentsUploaded = false;
+
+function goStep(n) {
+  document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.step').forEach((s,i) => {
+    s.classList.remove('active','done');
+    if (i+1 === n) s.classList.add('active');
+    else if (i+1 < n) s.classList.add('done');
+  });
+  const el = document.getElementById('form-step-' + n);
+  if (el) el.classList.add('active');
+  currentStep = n;
+
+  // On step 6: hide preview column, expand form to full width
+  const previewCol = document.getElementById('upload-preview-col');
+  const layout = document.getElementById('upload-layout');
+  if (n === 6) {
+    if (previewCol) previewCol.style.display = 'none';
+    if (layout) layout.style.gridTemplateColumns = '1fr';
+  } else {
+    if (previewCol) previewCol.style.display = 'block';
+    if (layout) layout.style.gridTemplateColumns = '';
+  }
+
+  if (n === 3) {
+    document.getElementById('methods-banner-uploaded').style.display = documentsUploaded ? 'block' : 'none';
+    document.getElementById('methods-banner-manual').style.display = documentsUploaded ? 'none' : 'block';
+  }
+  updatePreviewDisclaimer();
+  document.getElementById('page-upload').scrollTo({top:0,behavior:'smooth'});
+}
+
+function skipUpload() {
+  documentsUploaded = false;
+  goStep(3);
+}
+
+function updatePreviewDisclaimer() {
+  const el = document.getElementById('preview-disclaimer');
+  if (!el) return;
+  if (documentsUploaded) {
+    el.innerHTML = '<strong style="color:var(--text)">📋 Template preview — documents uploaded.</strong> Fields are pre-populated from your documents. The final AI summary runs after submission and will incorporate everything you\'ve provided.';
+  } else {
+    el.innerHTML = '<strong style="color:var(--text)">📋 Template preview — manual entry mode.</strong> The structure below reflects what your final summary will look like based on what you\'ve typed so far. The real AI-generated summary runs after you submit.';
+  }
+}
+
+// ── DROP ZONES ──
+function dzDrag(e, el) { e.preventDefault(); el.classList.add('drag-over'); }
+function dzLeave(el) { el.classList.remove('drag-over'); }
+function dzDrop(e, el, dzId, listId) {
+  e.preventDefault(); el.classList.remove('drag-over');
+  addFiles(e.dataTransfer.files, listId);
+}
+function fileChosen(input, dzId, listId) { addFiles(input.files, listId); }
+function addFiles(files, listId) {
+  const list = document.getElementById(listId);
+  Array.from(files).forEach(f => {
+    const chip = document.createElement('div');
+    chip.className = 'file-chip';
+    chip.innerHTML = `<span>${f.name}</span><span class="file-chip-remove" onclick="this.parentElement.remove()">✕</span>`;
+    list.appendChild(chip);
+  });
+}
+
+// ── AUTOFILL FROM DOCUMENT ──
+const afSteps = [
+  { pct: 15, text: 'Uploading documents…' },
+  { pct: 32, text: 'Extracting readable text…' },
+  { pct: 55, text: 'Identifying study design and population…' },
+  { pct: 78, text: 'Extracting outcomes and statistics…' },
+  { pct: 100, text: 'Complete — review highlighted fields' },
+];
+
+let afProgressTimer = null;
+
+function afDrop(e) {
+  e.preventDefault();
+  document.getElementById('af-dz').classList.remove('drag-over');
+  const files = Array.from(e.dataTransfer.files || []).filter(f => f && f.name);
+  if (files.length) runAutofill(files);
+}
+function afFileChosen(input) {
+  const files = Array.from(input.files || []).filter(f => f && f.name);
+  if (files.length) runAutofill(files);
+}
+
+function startAutofillProgress() {
+  const statusDiv = document.getElementById('af-status');
+  const bar = document.getElementById('af-bar');
+  const statusText = document.getElementById('af-status-text');
+  statusDiv.style.display = 'block';
+  bar.style.width = '0%';
+  statusText.textContent = 'Uploading documents…';
+
+  let step = 0;
+  if (afProgressTimer) clearInterval(afProgressTimer);
+  afProgressTimer = setInterval(() => {
+    if (step >= afSteps.length - 1) return;
+    bar.style.width = afSteps[step].pct + '%';
+    statusText.textContent = afSteps[step].text;
+    step += 1;
+  }, 550);
+}
+
+function finishAutofillProgress(successText) {
+  const bar = document.getElementById('af-bar');
+  const statusText = document.getElementById('af-status-text');
+  if (afProgressTimer) {
+    clearInterval(afProgressTimer);
+    afProgressTimer = null;
+  }
+  bar.style.width = '100%';
+  statusText.textContent = successText || 'Complete — review highlighted fields';
+}
+
+function setFieldValue(id, value) {
+  const el = document.getElementById(id);
+  if (!el || value === undefined || value === null || String(value).trim() === '') return;
+  el.value = String(value).trim();
+  el.classList.add('autofilled');
+  el.dispatchEvent(new Event(el.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true }));
+}
+
+function setSelectIfAllowed(id, value) {
+  const el = document.getElementById(id);
+  if (!el || !value) return false;
+  const normalized = String(value).trim().toLowerCase();
+  const option = Array.from(el.options).find(opt =>
+    opt.value.trim().toLowerCase() === normalized || opt.text.trim().toLowerCase() === normalized
+  );
+  if (!option) return false;
+  el.value = option.value;
+  el.classList.add('autofilled');
+  el.dispatchEvent(new Event('change', { bubbles: true }));
+  return true;
+}
+
+function setResultTypeSelection(value) {
+  const normalized = (value || '').toLowerCase().trim();
+  if (!['null', 'inconclusive', 'opposite'].includes(normalized)) return;
+  const selector = Array.from(document.querySelectorAll('#result-selector .result-opt')).find(opt =>
+    (opt.textContent || '').toLowerCase().includes(normalized)
+  );
+  if (selector) selectResult(normalized, selector);
+}
+
+function applyExtractedFields(fields) {
+  fields = fields || {};
+  const directMap = {
+    'f-title': fields.title,
+    'f-nct': fields.nct,
+    'f-n': fields.n,
+    'f-nplan': fields.nplan,
+    'f-intervention': fields.intervention,
+    'f-population': fields.population,
+    'f-dropout': fields.dropout,
+    'f-female': fields.female,
+    'f-age': fields.age,
+    'f-outcome': fields.outcome,
+    'f-pval': fields.pval,
+    'f-es': fields.es,
+    'f-limits': fields.limits
+  };
+
+  Object.entries(directMap).forEach(([id, value]) => setFieldValue(id, value));
+
+  setSelectIfAllowed('f-area', fields.area);
+  setSelectIfAllowed('f-design', fields.design);
+  if (fields.study_type) setSelectIfAllowed('f-type', fields.study_type);
+  if (fields.phase) setSelectIfAllowed('f-phase', fields.phase);
+  setResultTypeSelection(fields.result_type);
+
+  document.getElementById('af-status').style.display = 'none';
+  const doneEl = document.getElementById('af-done');
+  if (doneEl) doneEl.style.display = 'flex';
+  documentsUploaded = true;
+  updatePreviewDisclaimer();
+  updatePreview();
+}
+
+async function runAutofill(files) {
+  const filenames = files.map(f => f.name).join(', ');
+  document.getElementById('af-dz-text').textContent = '📄 ' + filenames;
+
+  const doneEl = document.getElementById('af-done');
+  if (doneEl) doneEl.style.display = 'none';
+
+  startAutofillProgress();
+
+  const formData = new FormData();
+  files.forEach(file => formData.append('files', file));
+
+  try {
+    const response = await fetch('/extract-study-fields', {
+      method: 'POST',
+      body: formData
+    });
+
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || 'Upload autofill failed.');
+    }
+
+    finishAutofillProgress('Complete — review highlighted fields');
+    applyExtractedFields(result.fields || {});
+  } catch (error) {
+    console.error(error);
+    if (afProgressTimer) {
+      clearInterval(afProgressTimer);
+      afProgressTimer = null;
+    }
+    document.getElementById('af-status').style.display = 'none';
+    showToast('Upload autofill failed', error.message || 'Could not extract fields from the uploaded file.');
+  }
+}
+
+let selectedResult = null;
+function selectResult(type, el) {
+  document.querySelectorAll('.result-opt').forEach(o => { o.className = 'result-opt'; });
+  el.classList.add('selected-' + type);
+  selectedResult = type;
+  updatePreview();
+}
+
+function updatePreview() {
+  const title = document.getElementById('f-title')?.value || '';
+  const outcome = document.getElementById('f-outcome')?.value || '';
+  const pval = document.getElementById('f-pval')?.value || '';
+  const es = document.getElementById('f-es')?.value || '';
+  const limits = document.getElementById('f-limits')?.value || '';
+  const area = document.getElementById('f-area')?.value || '';
+
+  const bg = document.getElementById('prev-background');
+  const fi = document.getElementById('prev-findings');
+  const fa = document.getElementById('prev-failure');
+  const co = document.getElementById('prev-contradiction');
+  const tg = document.getElementById('prev-tags');
+
+  if (title) {
+    bg.innerHTML = `This ${selectedResult || ''} result study investigated <em>${title}</em>. ${outcome ? 'The pre-specified primary outcome was: ' + outcome + '.' : ''}`;
+  } else {
+    bg.innerHTML = '<span class="summary-placeholder">Fill in study details to generate a live preview…</span>';
+  }
+
+  if (selectedResult && (pval || es)) {
+    const typeMap = { null: 'No statistically significant effect was observed', inconclusive: 'Results were inconclusive due to insufficient statistical power', opposite: 'An effect contrary to the original hypothesis was detected' };
+    fi.innerHTML = `${typeMap[selectedResult]}. ${pval ? 'Primary outcome: ' + pval + '.' : ''} ${es ? 'Effect estimate: ' + es + '.' : ''} ${limits ? '<br/>Key limitations: ' + limits : ''}`;
+  } else if (selectedResult) {
+    fi.innerHTML = `Result classified as <em>${selectedResult}</em>. Add statistics in Step 3 to complete.`;
+  } else {
+    fi.innerHTML = '<span class="summary-placeholder">Select a result type in Step 3 to populate findings.</span>';
+  }
+
+  if (title && area) {
+    fa.innerHTML = `AI will classify this as a <em>${area.toLowerCase()}</em> study and tag it by molecular target, failure mode, and population subgroup for repository indexing and comparison.`;
+  } else {
+    fa.innerHTML = '<span class="summary-placeholder">FailUp will auto-tag by mechanism, target, and population.</span>';
+  }
+
+  if (title && selectedResult === 'opposite') {
+    co.innerHTML = `<span style="color:var(--red)">⚠ Potential contradiction detected.</span> Prior positive results likely exist in this area. Full cross-reference will run on submission.`;
+  } else if (title) {
+    co.innerHTML = `Preliminary scan: no obvious contradictions. Full PubMed cross-reference runs on submission.`;
+  } else {
+    co.innerHTML = '<span class="summary-placeholder">AI will scan for conflicting prior positive results.</span>';
+  }
+
+  if (tg) {
+    if (title && area) {
+      tg.innerHTML = `MeSH: <em>${area}</em> · Target: auto-detected · Population: from inclusion criteria · Failure mode: from Step 3 · Repository indexing: auto-assigned`;
+    } else {
+      tg.innerHTML = '<span class="summary-placeholder">MeSH terms, ontology IDs, and repository tags and indexing details will appear here.</span>';
+    }
+  }
+}
+
+// ── SAVED SUBMISSIONS DRIVE THE UI ──
+
+function resetForm() {
+  document.querySelectorAll('#form-step-1 input, #form-step-1 select').forEach(el => {
+    if (el.tagName === 'SELECT') el.selectedIndex = 0;
+    else el.value = '';
+  });
+  document.querySelectorAll('.form-card input, .form-card textarea, .form-card select').forEach(el => {
+    if (el.tagName === 'SELECT') el.selectedIndex = 0;
+    else el.value = '';
+    el.classList.remove('autofilled');
+  });
+  selectedResult = null;
+  document.querySelectorAll('.result-opt').forEach(o => o.className = 'result-opt');
+  documentsUploaded = false;
+  document.getElementById('summary-generating').style.display = 'none';
+  document.getElementById('summary-results').style.display = 'none';
+  updatePreview();
+}
+
+
+function computeNFIndex(citationCounts) {
+  const sorted = [...citationCounts].sort((a, b) => b - a);
+  let h = 0;
+  for (let i = 0; i < sorted.length; i++) {
+    if (sorted[i] >= i + 1) {
+      h = i + 1;
+    } else {
+      break;
+    }
+  }
+  return h;
+}
+
+// Demo baseline contributions — always present, matched to citation activity panel
+const demoContributions = [
+  { title: 'VEGF-A inhibition in treatment-resistant glioblastoma', type: 'null', typeLabel: 'Null', phase: 'III', doi: '10.5281/fg.4821944', citations: 7, date: 'Mar 2025' },
+  { title: 'mTOR inhibition in HR+ breast cancer — adjuvant',       type: 'null', typeLabel: 'Null', phase: 'III', doi: '10.5281/fg.4788992', citations: 12, date: 'Nov 2024' },
+  { title: 'PD-L1 blockade in advanced NSCLC — 2nd line',           type: 'null', typeLabel: 'Null', phase: 'II/III', doi: '10.5281/fg.4677881', citations: 4, date: 'Sep 2024' },
+  { title: 'IL-6 receptor blockade in NASH — Phase II',             type: 'inconclusive', typeLabel: 'Inconclusive', phase: 'II', doi: '10.5281/fg.5003141', citations: 3, date: 'Jan 2025' },
+];
+
+function updateProfileFromSavedSubmissions() {
+  const newSubmissions = savedSubmissions || [];
+
+  // Merge: new (real) submissions on top, demo baseline always present
+  const demoCitations = demoContributions.map(d => d.citations);
+  const newCitations  = newSubmissions.map(() => 2);
+  const allCitations  = [...newCitations, ...demoCitations];
+
+  const totalSubmissions = newSubmissions.length + demoContributions.length;
+  const totalCitations   = allCitations.reduce((a, b) => a + b, 0);
+  const nfIndex          = computeNFIndex(allCitations);
+
+  const contradictionCount = newSubmissions.filter(sub => {
+    const text = (sub.summary?.contradiction_check || '').toLowerCase();
+    return text && text !== 'not assessed from provided information.';
+  }).length + 1; // PD-L1 contradiction is always present
+
+  // Top stat cards
+  const profileNFIndex     = document.getElementById('profile-nf-index');
+  const profileSubmissions = document.getElementById('profile-submissions');
+    const profileContradictions = document.getElementById('profile-contradictions');
+  const profileCitations   = document.getElementById('profile-citations');
+  const profileSummary     = document.getElementById('profile-contrib-summary');
+  const tbody              = document.getElementById('contributions-tbody');
+
+  if (profileNFIndex)       profileNFIndex.textContent       = nfIndex;
+  if (profileSubmissions)   profileSubmissions.textContent   = totalSubmissions;
+  if (profileContradictions) profileContradictions.textContent = contradictionCount;
+  if (profileCitations)     profileCitations.textContent     = totalCitations;
+  if (profileSummary)       profileSummary.textContent       = `${totalSubmissions} submissions · ${totalCitations} total citations`;
+
+  // NF-index hero card
+  const nfScore       = document.getElementById('nf-index-score');
+  const nfSub         = document.getElementById('nf-index-sub');
+  const nfBreakdown   = document.getElementById('nf-breakdown');
+  const nfNextMilestone = document.getElementById('nf-next-milestone');
+
+  if (nfScore) nfScore.textContent = nfIndex;
+  if (nfSub)   nfSub.textContent   = `${nfIndex} negative findings each cited ≥${nfIndex} times`;
+
+  if (nfBreakdown) {
+    const allEntries = [
+      ...newSubmissions.map((sub, i) => ({ title: sub.title || 'Untitled', citations: newCitations[i] })),
+      ...demoContributions.map(d => ({ title: d.title, citations: d.citations }))
+    ];
+    const maxCit = Math.max(...allEntries.map(e => e.citations), nfIndex, 1);
+    nfBreakdown.innerHTML = allEntries.map(entry => {
+      const width = Math.max(8, (entry.citations / maxCit) * 100);
+      const label = entry.title.substring(0, 18) + (entry.title.length > 18 ? '…' : '');
+      return `
+        <div class="nf-bar-row">
+          <span class="nf-bar-label">${escapeHtml(label)}</span>
+          <div class="nf-bar-track"><div class="nf-bar-fill" style="width:${Math.min(width,100)}%"></div></div>
+          <span class="nf-bar-val">${entry.citations} citation${entry.citations !== 1 ? 's' : ''}</span>
+        </div>`;
+    }).join('');
+  }
+
+  if (nfNextMilestone) {
+    nfNextMilestone.innerHTML =
+      `Current NF-index: <span style="color:var(--accent)">${nfIndex}</span>. ` +
+      `More citations across your saved findings will increase this score.`;
+  }
+
+  // Contributions table — new submissions on top, demo rows always below
+  if (!tbody) return;
+
+  const demoTableRows = demoContributions.map(d => {
+    const counts = d.citations >= nfIndex && nfIndex > 0;
+    return `
+      <tr>
+        <td>${escapeHtml(d.title)}</td>
+        <td><span class="trial-type type-${d.type}">${d.typeLabel}</span></td>
+        <td style="color:var(--text3)">${d.phase}</td>
+        <td><span class="doi-link">${d.doi}</span></td>
+        <td style="color:var(--accent)">${d.citations}</td>
+        <td><span style="color:${counts ? 'var(--accent)' : 'var(--text3)'};font-size:11px">${counts ? `✓ Counts (≥${nfIndex})` : '✗ Below threshold'}</span></td>
+        <td>${d.date}</td>
+      </tr>`;
+  }).join('');
+
+  const newTableRows = newSubmissions.map((sub, idx) => {
+    const type      = normalizeType(sub.result_type);
+    const typeLabel = (sub.result_type || 'Null').trim();
+    const phase     = sub.study_type || '—';
+    const date      = sub.submitted_at
+      ? new Date(sub.submitted_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+      : '—';
+    const citations   = newCitations[idx];
+    const contributes = citations >= nfIndex && nfIndex > 0;
+    return `
+      <tr>
+        <td>${escapeHtml(sub.title || 'Untitled submission')}</td>
+        <td><span class="trial-type type-${type}">${escapeHtml(typeLabel)}</span></td>
+        <td style="color:var(--text3)">${escapeHtml(phase)}</td>
+        <td><span class="doi-link">${escapeHtml(sub.doi || '')}</span></td>
+        <td style="color:var(--text3)">${citations}</td>
+        <td><span style="color:${contributes ? 'var(--accent)' : 'var(--text3)'};font-size:11px">${contributes ? `✓ Counts (≥${nfIndex})` : 'Pending citations'}</span></td>
+        <td>${escapeHtml(date)}</td>
+      </tr>`;
+  }).join('');
+
+  tbody.innerHTML = newTableRows + demoTableRows;
+
+  // Prepend new submission activity items (remove previous dynamic ones first)
+  const activityList = document.getElementById('citation-activity-list');
+  if (activityList) {
+    activityList.querySelectorAll('.dynamic-activity').forEach(el => el.remove());
+    [...newSubmissions].reverse().forEach(sub => {
+      const row = document.createElement('div');
+      row.className = 'trial-row dynamic-activity';
+      row.innerHTML = `
+        <span class="trial-name" style="font-size:12px">Your finding "<em>${escapeHtml((sub.title || 'Untitled').substring(0, 40))}${(sub.title||'').length > 40 ? '…' : ''}</em>" was added to the repository</span>
+        <span class="trial-meta" style="color:var(--accent)">Just now</span>`;
+      activityList.insertBefore(row, activityList.firstChild);
+    });
+  }
+}
+
+async function submitForm() {
+  const title = document.getElementById('f-title')?.value || '';
+  const study_type = document.getElementById('f-type')?.value || '';
+  const result_type = selectedResult
+    ? selectedResult.charAt(0).toUpperCase() + selectedResult.slice(1)
+    : '';
+  const intervention = document.getElementById('f-intervention')?.value || '';
+  const population = document.getElementById('f-population')?.value || '';
+  const primary_outcome = document.getElementById('f-outcome')?.value || '';
+  const p_value = document.getElementById('f-pval')?.value || '';
+  const effect_estimate = document.getElementById('f-es')?.value || '';
+  const limitations = document.getElementById('f-limits')?.value || '';
+
+  if (!title || !intervention || !population || !primary_outcome) {
+    showToast(
+      'Missing required fields',
+      'Please fill in study title, intervention, population, and primary outcome before submitting.'
+    );
+    return;
+  }
+
+  // Move to step 6 and show generating state immediately
+  goStep(6);
+  document.getElementById('summary-generating').style.display = 'block';
+  document.getElementById('summary-results').style.display = 'none';
+
+  // Animate progress bar
+  const bar = document.getElementById('gen-progress-bar');
+  const statusText = document.getElementById('gen-status-text');
+  const genSteps = [
+    { pct:15, text:'Sending submission to Claude…' },
+    { pct:35, text:'Reading study metadata…' },
+    { pct:55, text:'Classifying failure mode…' },
+    { pct:72, text:'Running contradiction check…' },
+    { pct:88, text:'Generating study tags…' },
+    { pct:95, text:'Finalising summary…' },
+  ];
+  let gi = 0;
+  const genInterval = setInterval(() => {
+    if (gi < genSteps.length) {
+      bar.style.width = genSteps[gi].pct + '%';
+      statusText.textContent = genSteps[gi].text;
+      gi++;
+    }
+  }, 600);
+
+  try {
+    const response = await fetch('/summarize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title, study_type, result_type, intervention,
+        population, primary_outcome, p_value,
+        effect_estimate, limitations
+      })
+    });
+
+    const result = await response.json();
+    clearInterval(genInterval);
+
+    if (!result.success) throw new Error(result.error || 'Unknown server error');
+
+    const summary = result.summary;
+    const doi = result.doi;
+    await loadSavedSubmissions();
+    renderFailureSummary();
+
+    // Complete progress bar
+    bar.style.width = '100%';
+    statusText.textContent = 'Complete!';
+
+    setTimeout(() => {
+      document.getElementById('summary-generating').style.display = 'none';
+      document.getElementById('summary-results').style.display = 'block';
+
+      // Populate results panel
+      document.getElementById('result-doi').textContent = doi;
+      document.getElementById('result-background').textContent = summary.background || 'No background returned.';
+      document.getElementById('result-study-plan').textContent = summary.study_plan || 'Study plan not clearly reported from the available information.';
+      document.getElementById('result-methods').textContent = summary.methods || 'Methods were not clearly reported from the available information.';
+      document.getElementById('result-findings').textContent = summary.findings || 'No results summary returned.';
+      document.getElementById('result-failure').textContent = summary.failure_mode || 'No failure mode returned.';
+      document.getElementById('result-contradiction').textContent = summary.contradiction_check || 'No contradiction check returned.';
+      document.getElementById('result-limitation').textContent = summary.main_limitation || 'No main limitation returned.';
+
+      const tags = summary.graph_tags || {};
+      document.getElementById('result-tags').textContent =
+        `Mechanism: ${tags.mechanism || 'unspecified'} · ` +
+        `Target: ${tags.target || 'unspecified'} · ` +
+        `Population: ${tags.population || 'unspecified'} · ` +
+        `Therapeutic area: ${tags.therapeutic_area || 'unspecified'}`;
+
+      // Update profile
+      updateProfileFromSavedSubmissions();
+      showToast('Summary generated', 'AI summary completed — Step 6 is ready for review.');
+    }, 400);
+
+  } catch (error) {
+    clearInterval(genInterval);
+    console.error(error);
+    // Show a graceful fallback with mock data if server isn't running
+    bar.style.width = '100%';
+    setTimeout(() => {
+      document.getElementById('summary-generating').style.display = 'none';
+      document.getElementById('summary-results').style.display = 'block';
+      const doi = '10.5281/fu.' + Math.floor(Math.random()*9000000+1000000);
+      document.getElementById('result-doi').textContent = doi;
+      document.getElementById('result-background').textContent =
+        `[Demo mode — no server connected] This ${result_type || 'negative'} result study investigated "${title}". ${primary_outcome ? 'The primary outcome was: ' + primary_outcome + '.' : ''}`;
+      document.getElementById('result-study-plan').textContent = `[Demo mode — no server connected] The study appears to have been designed to evaluate whether the intervention improved the primary outcome in the specified population.`;
+      document.getElementById('result-methods').textContent = `Structured methods summary pending — connect the API for a full description of the design, population, intervention, comparator, endpoint, and analysis approach.`;
+      document.getElementById('result-findings').textContent =
+        `Primary outcome not met. ${p_value ? 'p = ' + p_value + '.' : ''} ${effect_estimate ? 'Effect estimate: ' + effect_estimate + '.' : ''} ${limitations ? 'Key limitations: ' + limitations : ''}`;
+      document.getElementById('result-failure').textContent = 'AI classification pending — connect to Claude API for live classification.';
+      document.getElementById('result-contradiction').textContent = 'Contradiction scan pending — requires PubMed API integration.';
+      document.getElementById('result-limitation').textContent = limitations || 'No limitations entered — connect to Claude API for AI-extracted main limitation.';
+      document.getElementById('result-tags').textContent = `Mechanism: auto-detect pending · Target: auto-detect pending · Population: from submission · Therapeutic area: ${document.getElementById('f-area')?.value || 'unspecified'}`;
+      updateProfileFromSavedSubmissions();
+      showToast('Demo mode', 'Server not connected — showing template output. Connect the API for live summaries.');
+    }, 400);
+  }
+}
+
+// ── SAVED SUBMISSIONS + SEARCH ──
+let savedSubmissions = [];
+let importedTrials = [];
+let importedPubmed = [];
+
+const demoResults = [
+  { title: 'VEGF-A inhibition in treatment-resistant glioblastoma', type: 'null', body: 'Phase III RCT (n=340). Primary endpoint of overall survival at 24 months not met (p=0.43, HR 1.02). Hypothesized anti-angiogenic effect did not translate across blood–brain barrier in this population.', meta: 'NCT04821944 · Oncology · 2025', contradiction: false },
+  { title: 'β-glucan supplementation in post-COVID fatigue syndrome', type: 'opposite', body: 'Randomized crossover (n=120). Contrary to hypothesis, β-glucan arm showed 12% worsening of fatigue scores at 12 weeks (p=0.03). Possible immune overstimulation mechanism proposed.', meta: 'NCT05192847 · Immunology · 2025', contradiction: true },
+  { title: 'Ketamine micro-dosing in treatment-resistant bipolar depression', type: 'inconclusive', body: 'Underpowered Phase II (n=62 vs required n=180). MADRS score improvement trend observed but CI crosses null (p=0.11). Dropout rate 22%. Inconclusive — larger trial warranted.', meta: 'NCT04903028 · Psychiatry · 2024', contradiction: false }
+];
+
+function escapeHtml(str) {
+  return (str || '').replace(/[&<>"']/g, function (m) {
+    return ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'": '&#39;' })[m];
+  });
+}
+
+function normalizeType(type) {
+  const t = (type || '').toLowerCase();
+  if (t.includes('null')) return 'null';
+  if (t.includes('inconclusive')) return 'inconclusive';
+  if (t.includes('opposite')) return 'opposite';
+  return 'null';
+}
+
+function formatSavedSubmission(sub) {
+  const resultType = normalizeType(sub.result_type);
+  const tags = sub.summary?.graph_tags || {};
+  const therapeuticArea = tags.therapeutic_area || 'Unspecified area';
+  const year = (sub.submitted_at || '').slice(0, 4) || 'Saved';
+  return {
+    id: sub.id,
+    doi: sub.doi,
+    title: sub.title || 'Untitled submission',
+    type: resultType,
+    body: sub.summary?.findings || 'No findings available.',
+    meta: `${therapeuticArea} · ${year}`,
+    contradiction: (sub.summary?.contradiction_check || '').toLowerCase() !== 'not assessed from provided information.',
+    source: 'manual',
+    sourceLabel: sourceLabels.manual,
+    raw: sub
+  };
+}
+
+function formatImportedTrial(trial) {
+  const title = trial.title || trial.nct_id || 'Untitled imported trial';
+  const conditionText = (trial.conditions || []).slice(0, 2).join(', ');
+  const interventionText = (trial.interventions || []).slice(0, 2).join(', ');
+  const body = trial.summary?.findings
+    ? trial.summary.findings
+    : trial.brief_summary
+      ? trial.brief_summary
+      : `${conditionText || 'No condition listed.'} ${interventionText ? 'Interventions: ' + interventionText : ''}`;
+
+  const curation = trial.curation || {};
+
+  let type = 'inconclusive';
+  if (curation.failure_class) {
+    type = normalizeType(curation.failure_class);
+  } else if (trial.result_type) {
+    type = normalizeType(trial.result_type);
+  } else {
+    const status = (trial.status || '').toLowerCase();
+    if (status.includes('terminated') || status.includes('withdrawn')) {
+      type = 'opposite';
+    } else if (status.includes('completed')) {
+      type = 'null';
+    }
+  }
+
+  let source = 'ctgov_imported';
+  if (curation.review_status === 'curated_failure' && curation.graph_worthy === true) {
+    source = 'ctgov_curated';
+  } else if (trial.summary) {
+    source = 'ctgov_enriched';
+  }
+
+  return {
+    id: `ctgov-${trial.id}`,
+    nct_id: trial.nct_id,
+    title,
+    type,
+    body,
+    meta: `${trial.nct_id || 'ClinicalTrials.gov'} · ${trial.phase || 'No phase'} · ${trial.status || 'Unknown status'}`,
+    contradiction: (trial.summary?.contradiction_check || '').toLowerCase() !== 'not assessed from provided information.' && !!trial.summary,
+    imported: true,
+    source,
+    sourceLabel: sourceLabels[source],
+    raw: trial
+  };
+}
+
+async function loadSavedSubmissions() {
+  try {
+    const response = await fetch('/submissions');
+    if (!response.ok) {
+      // Server not running or endpoint missing — silently use demo data
+      savedSubmissions = [];
+    } else {
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        // Got HTML back (e.g. a 404 page) — not a real API response
+        savedSubmissions = [];
+      } else {
+        const result = await response.json();
+        savedSubmissions = result.success ? (result.submissions || []) : [];
+      }
+    }
+  } catch (error) {
+    // Network error or no server — demo mode, no console noise needed
+    savedSubmissions = [];
+  }
+  renderDashboardRecent();
+  renderResults('');
+  updateProfileFromSavedSubmissions();
+}
+
+async function loadImportedTrials() {
+  try {
+    const response = await fetch('/ctgov-trials');
+    if (!response.ok) {
+      importedTrials = [];
+    } else {
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        importedTrials = [];
+      } else {
+        const result = await response.json();
+        importedTrials = result.success ? (result.trials || []) : [];
+      }
+    }
+  } catch (error) {
+    importedTrials = [];
+  }
+  renderResults('');
+}
+
+function formatImportedPubmedArticle(article) {
+  const title = article.title || article.pmid || 'Untitled imported article';
+  const body = article.summary?.findings
+    ? article.summary.findings
+    : article.abstract
+      ? article.abstract
+      : 'No abstract or summary available.';
+
+  const curation = article.curation || {};
+  let source = 'pubmed_imported';
+
+  if (curation.review_status === 'curated_failure' && curation.graph_worthy === true) {
+    source = 'pubmed_curated';
+  } else if (article.summary) {
+    source = 'pubmed_enriched';
+  }
+
+  const type = normalizeType(
+    curation.failure_class || article.result_type || 'inconclusive'
+  );
+
+  return {
+    id: `pubmed-${article.id}`,
+    pmid: article.pmid,
+    title,
+    type,
+    body,
+    meta: `${article.pmid || 'PubMed'} · ${article.journal || 'No journal'} · ${article.pub_date || 'No date'}`,
+    contradiction: (article.summary?.contradiction_check || '').toLowerCase() !== 'not assessed from provided information.' && !!article.summary,
+    imported: true,
+    source,
+    sourceLabel: sourceLabels[source],
+    raw: article,
+    isPubmed: true
+  };
+}
+
+async function loadImportedPubmed() {
+  try {
+    const response = await fetch('/pubmed-articles');
+    if (!response.ok) {
+      importedPubmed = [];
+    } else {
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        importedPubmed = [];
+      } else {
+        const result = await response.json();
+        importedPubmed = result.success ? (result.articles || []) : [];
+      }
+    }
+  } catch (error) {
+    importedPubmed = [];
+  }
+  renderResults('');
+  renderFailureSummary();
+}
+
+function renderDashboardRecent() {
+  const container = document.getElementById('dashboard-recent-list');
+  if (!container) return;
+  if (!savedSubmissions.length) {
+    container.innerHTML = `<div style="font-size:12px;color:var(--text3);padding:16px 18px;">No saved submissions yet. Submit a finding to see it here.</div>`;
+    return;
+  }
+  const topFive = savedSubmissions.slice(0, 5);
+  container.innerHTML = topFive.map((sub, idx) => {
+    const formatted = formatSavedSubmission(sub);
+    return `
+      <div class="trial-row" onclick="openSavedSubmissionModal(${idx})">
+        <span class="trial-type type-${formatted.type}">${formatted.type}</span>
+        <span class="trial-name">${escapeHtml(formatted.title)}</span>
+        <span class="trial-meta">${escapeHtml(sub.doi || '')}</span>
+      </div>`;
+  }).join('');
+}
+
+function renderResults(query) {
+  const list = document.getElementById('results-list');
+  if (!list) return;
+
+  const q = (query || '').toLowerCase();
+
+  const savedFormatted    = savedSubmissions.map(formatSavedSubmission);
+  const importedCtgov     = importedTrials.map(formatImportedTrial);
+  const importedPubmedFmt = importedPubmed.map(formatImportedPubmedArticle);
+
+  const combined = [...savedFormatted, ...importedCtgov, ...importedPubmedFmt, ...demoResults];
+
+  const filtered = q
+    ? combined.filter(r =>
+        (r.title || '').toLowerCase().includes(q) ||
+        (r.body  || '').toLowerCase().includes(q) ||
+        (r.meta  || '').toLowerCase().includes(q))
+    : combined;
+
+  if (!filtered.length) {
+    list.innerHTML = `<div style="font-size:12px;color:var(--text3);">No results found.</div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map((r, idx) => {
+    const isSaved    = !!r.raw && !r.imported;
+    const isImported = !!r.imported;
+    return `
+      <div class="result-card" onclick="${
+        isSaved    ? `openSavedSubmissionModal(${idx})` :
+        isImported ? (r.isPubmed ? `openImportedPubmedModal(${idx})` : `openImportedTrialModal(${idx})`) :
+                     `openModal('search')`
+      }">
+        <div class="result-card-head">
+          <span class="trial-type type-${r.type}">${r.type}</span>
+          <span class="source-badge source-${r.source || 'manual'}">${escapeHtml(r.sourceLabel || 'Source')}</span>
+          <div class="result-card-title">${escapeHtml(r.title)}</div>
+          ${r.contradiction ? '<span class="contradiction-badge">⚠ Contradiction</span>' : ''}
+        </div>
+        <div class="result-card-body">${escapeHtml(r.body)}</div>
+        <div class="result-card-footer">
+          <span class="result-card-meta">${escapeHtml(r.meta)}</span>
+          <span class="result-card-meta" style="color:var(--accent);margin-left:auto">
+            ${isSaved    ? escapeHtml(r.doi || 'Saved submission') :
+              isImported ? 'View imported record →' :
+                           'View summary →'}
+          </span>
+        </div>
+      </div>`;
+  }).join('');
+
+  window.currentRenderedResults = filtered;
+}
+
+function filterResults(val) { renderResults(val); }
+
+function openSavedSubmissionModal(renderedIndex) {
+  const result = window.currentRenderedResults?.[renderedIndex];
+  if (!result || !result.raw) return;
+  const sub = result.raw;
+  const summary = sub.summary || {};
+  const tags = summary.graph_tags || {};
+  document.getElementById('modal-title').textContent = sub.title || 'Saved submission';
+  document.getElementById('modal-sub').textContent =
+    `${sub.doi || ''} · ${sub.study_type || 'Study'} · ${sub.result_type || 'Result'}`;
+  document.getElementById('modal-body').innerHTML = `
+    <div class="modal-section"><div class="modal-section-label">Source</div>${escapeHtml(result.sourceLabel || sourceLabels.manual)}</div>
+    <div class="modal-section"><div class="modal-section-label">Background</div>${escapeHtml(summary.background || 'Not available.')}</div>
+    <div class="modal-section"><div class="modal-section-label">Study plan</div>${escapeHtml(summary.study_plan || 'Not available.')}</div>
+    <div class="modal-section"><div class="modal-section-label">Methods</div>${escapeHtml(summary.methods || 'Not available.')}</div>
+    <div class="modal-section"><div class="modal-section-label">Findings</div>${escapeHtml(summary.findings || 'Not available.')}</div>
+    <div class="modal-section"><div class="modal-section-label">Main limitation</div>${escapeHtml(summary.main_limitation || 'Not available.')}</div>
+    <div class="modal-section"><div class="modal-section-label">Failure mode</div>${escapeHtml(summary.failure_mode || 'Not available.')}</div>
+    <div class="modal-section"><div class="modal-section-label">Contradiction check</div>${escapeHtml(summary.contradiction_check || 'Not available.')}</div>
+    <div class="modal-section"><div class="modal-section-label">Study tags</div>
+      <span style="font-family:var(--font-mono);font-size:11px;color:var(--accent)">
+        Mechanism: ${escapeHtml(tags.mechanism || 'unspecified')} ·
+        Target: ${escapeHtml(tags.target || 'unspecified')} ·
+        Population: ${escapeHtml(tags.population || 'unspecified')} ·
+        Therapeutic area: ${escapeHtml(tags.therapeutic_area || 'unspecified')}
+      </span>
+    </div>
+    <div class="modal-section"><div class="modal-section-label">DOI</div>
+      <span style="color:var(--accent);font-family:var(--font-mono);font-size:12px">${escapeHtml(sub.doi || '')}</span>
+    </div>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+function openImportedTrialModal(renderedIndex) {
+  const result = window.currentRenderedResults?.[renderedIndex];
+  if (!result || !result.raw) return;
+
+  const trial = result.raw;
+
+  document.getElementById('modal-title').textContent = trial.title || 'Imported trial';
+  document.getElementById('modal-sub').textContent =
+    `${trial.nct_id || ''} · ${trial.phase || 'No phase'} · ${trial.status || 'Unknown status'}`;
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="modal-section">
+      <div class="modal-section-label">Source</div>
+      ${escapeHtml(result.sourceLabel || 'Imported ClinicalTrials.gov')}
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-label">Study type</div>
+      ${escapeHtml(trial.study_type || 'Not available')}
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-label">Conditions</div>
+      ${escapeHtml((trial.conditions || []).join(', ') || 'Not available')}
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-label">Interventions</div>
+      ${escapeHtml((trial.interventions || []).join(', ') || 'Not available')}
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-label">Population</div>
+      ${escapeHtml(trial.population || 'Not available')}
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-label">Primary outcome</div>
+      ${escapeHtml(trial.primary_outcome || 'Not available')}
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-label">Brief summary</div>
+      ${escapeHtml(trial.brief_summary || 'Not available')}
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-label">Link</div>
+      <a href="${escapeHtml(trial.url || '#')}" target="_blank" rel="noopener noreferrer" style="color:var(--accent);font-family:var(--font-mono);font-size:12px;">
+        ${escapeHtml(trial.url || '')}
+      </a>
+    </div>
+  `;
+
+  document.getElementById('modal').classList.add('open');
+}
+
+function openImportedPubmedModal(renderedIndex) {
+  const result = window.currentRenderedResults?.[renderedIndex];
+  if (!result || !result.raw) return;
+
+  const article = result.raw;
+  const summary = article.summary || {};
+  const curation = article.curation || {};
+
+  document.getElementById('modal-title').textContent = article.title || 'Imported PubMed article';
+  document.getElementById('modal-sub').textContent =
+    `${article.pmid || ''} · ${article.journal || 'No journal'} · ${article.pub_date || 'No date'}`;
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="modal-section"><div class="modal-section-label">Source</div>${escapeHtml(result.sourceLabel || 'Imported PubMed')}</div>
+    <div class="modal-section"><div class="modal-section-label">Article type</div>${escapeHtml(article.article_type || 'Not available')}</div>
+    <div class="modal-section"><div class="modal-section-label">Abstract</div>${escapeHtml(article.abstract || 'Not available')}</div>
+    <div class="modal-section"><div class="modal-section-label">AI findings</div>${escapeHtml(summary.findings || 'Not available')}</div>
+    <div class="modal-section"><div class="modal-section-label">Curation status</div>${escapeHtml(curation.review_status || 'Not curated')}</div>
+    <div class="modal-section"><div class="modal-section-label">Curation basis</div>${escapeHtml(curation.basis || 'Not available')}</div>
+    <div class="modal-section"><div class="modal-section-label">Link</div>
+      <a href="${escapeHtml(article.url || '#')}" target="_blank" rel="noopener noreferrer" style="color:var(--accent);font-family:var(--font-mono);font-size:12px;">
+        ${escapeHtml(article.url || '')}
+      </a>
+    </div>`;
+
+  document.getElementById('modal').classList.add('open');
+}
+
+// ── MODAL ──
+const modalData = {
+  trial1: {
+    title: 'VEGF-A inhibition in treatment-resistant glioblastoma',
+    sub: 'NCT04821944 · Phase III · Null result',
+    body: `
+      <div class="modal-section"><div class="modal-section-label">Background</div>VEGF-A driven angiogenesis was hypothesized to sustain tumor vasculature in recurrent GBM. This Phase III trial investigated bevacizumab plus standard of care vs placebo.</div>
+      <div class="modal-section"><div class="modal-section-label">Primary outcome</div>Overall survival at 24 months. Not met: HR 1.02 (95% CI 0.88–1.18), p=0.43.</div>
+      <div class="modal-section"><div class="modal-section-label">Failure mode (AI-classified)</div>Target validity — anti-angiogenic effect did not translate across the blood–brain barrier. Population heterogeneity also implicated.</div>
+      <div class="modal-section"><div class="modal-section-label">Contradiction check</div><span style="color:var(--accent)">✓ No contradictions detected.</span> Consistent with two prior Phase II null results in this population.</div>
+      <div class="modal-section"><div class="modal-section-label">DOI</div><span style="color:var(--accent);font-family:var(--font-mono);font-size:12px">10.5281/fg.4821944</span></div>`
+  },
+  trial2: {
+    title: 'β-glucan supplementation in post-COVID fatigue syndrome',
+    sub: 'NCT05192847 · RCT · Opposite effect',
+    body: `
+      <div class="modal-section"><div class="modal-section-label">Background</div>β-glucan was hypothesized to reduce fatigue via immunomodulation in post-COVID syndrome. Crossover design, n=120.</div>
+      <div class="modal-section"><div class="modal-section-label">Primary outcome</div>Fatigue severity score at 12 weeks. <span style="color:var(--red)">Opposite effect observed:</span> 12% worsening in β-glucan arm (p=0.03).</div>
+      <div class="modal-section"><div class="modal-section-label">Failure mode (AI-classified)</div>Immune overstimulation. Proposed mechanism: β-glucan exacerbates neuroinflammatory component of post-COVID fatigue.</div>
+      <div class="modal-section"><div class="modal-section-label">Contradiction check</div><span style="color:var(--red)">⚠ Contradiction flagged.</span> Three prior observational studies reported benefit in healthy populations. AI flagged for editorial review.</div>
+      <div class="modal-section"><div class="modal-section-label">DOI</div><span style="color:var(--accent);font-family:var(--font-mono);font-size:12px">10.5281/fg.5192847</span></div>`
+  },
+  trial3: {
+    title: 'Ketamine micro-dosing in treatment-resistant bipolar depression',
+    sub: 'NCT04903028 · Phase II · Inconclusive',
+    body: `
+      <div class="modal-section"><div class="modal-section-label">Background</div>Micro-dose ketamine (0.1mg/kg) was trialed as a mood stabilizer adjunct in bipolar I/II with treatment-resistant depression.</div>
+      <div class="modal-section"><div class="modal-section-label">Primary outcome</div>MADRS improvement at 6 weeks. Trend observed (−4.2 points) but CI crosses null (p=0.11). Study was underpowered (n=62 vs required n=180).</div>
+      <div class="modal-section"><div class="modal-section-label">Failure mode (AI-classified)</div>Insufficient power — not a true null. Signal warrants adequately powered replication. Dropout rate (22%) also reduces confidence.</div>
+      <div class="modal-section"><div class="modal-section-label">Contradiction check</div><span style="color:var(--accent)">✓ No contradictions detected.</span> Consistent with mixed ketamine literature in this subpopulation.</div>
+      <div class="modal-section"><div class="modal-section-label">DOI</div><span style="color:var(--accent);font-family:var(--font-mono);font-size:12px">10.5281/fg.4903028</span></div>`
+  },
+  search: {
+    title: 'Study detail',
+    sub: 'FailUp repository entry',
+    body: `<div class="modal-section"><div class="modal-section-label">Full detail</div>Click any result card on the dashboard for a specific study modal. Search results link directly to the failure summary.</div>`
+  }
+};
+
+function openModal(id) {
+  const d = modalData[id] || modalData.trial1;
+  document.getElementById('modal-title').textContent = d.title;
+  document.getElementById('modal-sub').textContent = d.sub;
+  document.getElementById('modal-body').innerHTML = d.body;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(e) { if (e.target === document.getElementById('modal')) document.getElementById('modal').classList.remove('open'); }
+
+// ── TOAST ──
+function showToast(title, body) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-body').textContent = body;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 5000);
+}
+
+// Init
+loadSavedSubmissions();
+loadImportedTrials();
+loadImportedPubmed();
+renderFailureSummary();
+</script>
+</body>
+</html>
